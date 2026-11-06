@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#086288">
+<meta name="description" content="Pratinjau administrasi akun, CPCL, impor dan audit SITERA berdasarkan SRS v0.12.">
+<title>Area Super Admin — SITERA</title>
+<link rel="icon" type="image/webp" href="/sitera/sitera-logo.webp"><link rel="stylesheet" href="/sitera/theme.css"><link rel="stylesheet" href="/sitera/pelapor-review.css"><link rel="stylesheet" href="/sitera/superadmin-review.css">
+</head>
+<body>
+<div class="prototype-ribbon"><span class="live-dot"></span> PRATINJAU UI/UX <span class="ribbon-divider">•</span> DATA SIMULASI</div>
+<header class="app-header">
+ <a class="brand" href="/sitera/superadmin-review.html" aria-label="SITERA beranda"><span class="brand-logo"><img src="/sitera/sitera-logo.webp" alt="Logo Irigasi Pertanian"></span><span class="brand-copy"><strong>SITERA</strong><small>Sistem Informasi Rekapitulasi & Pemantauan Kegiatan Irigasi Pertanian</small></span></a>
+ <div class="header-right">
+      <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button><span class="internal-tag"><span></span> Sistem internal</span>
+  <button class="icon-button" type="button" aria-label="Notifikasi" id="notification-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <div class="profile"><span class="avatar">SA</span><span class="profile-copy"><strong>Super Admin</strong><small>Administrasi Sistem</small></span></div><a class="exit-link" href="/">Keluar demo</a>
+ </div>
+</header>
+<nav class="main-nav" id="main-nav" aria-label="Navigasi Super Admin">
+ <button class="nav-item active" data-view="dashboard"><span class="nav-icon">⌂</span>Ringkasan</button>
+ <button class="nav-item" data-view="accounts"><span class="nav-icon">♙</span>Manajemen Akun</button>
+ <button class="nav-item" data-view="cpcl"><span class="nav-icon">▤</span>Data CPCL</button>
+ <button class="nav-item" data-view="imports"><span class="nav-icon">⇧</span>Impor CPCL</button>
+ <button class="nav-item" data-view="audit"><span class="nav-icon">◷</span>Audit Log</button>
+</nav>
+<div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+<main class="workspace">
+ <div class="page-heading"><div><div class="breadcrumb"><span>Ruang Administrasi</span><span>/</span><strong id="breadcrumb-current">Ringkasan</strong></div><h1 id="page-title">Ringkasan administrasi</h1><p id="page-description">Siapkan akun dan referensi CPCL untuk mendukung proses pelaporan.</p></div><div class="heading-actions"><span class="period-chip"><span></span> Pembaruan · 30 Okt 2026</span></div></div>
+ <div class="notice"><span class="notice-icon">i</span><span><strong>Mode pratinjau administrasi.</strong> Seluruh akun dan CPCL adalah data ilustrasi. Perubahan disimpan di browser ini, belum ke database. Proses penerbitan kredensial dan unduh sekali memerlukan backend.</span></div>
+
+ <section id="view-dashboard" class="view active">
+  <div class="metrics-grid admin-metrics" id="admin-metrics"></div>
+  <section class="panel cpcl-donut-panel role-cpcl-donut">
+   <div class="panel-heading cpcl-chart-heading">
+    <div><h2>Rekap Status CPCL</h2><p>Jumlah CPCL berdasarkan status pelaporan BAST.</p></div>
+    <label class="cpcl-scope-control"><span>Cakupan diagram</span><select id="cpcl-chart-regency" class="filter-control" aria-label="Pilih cakupan diagram donat">
+     <option value="Nasional">Nasional</option><option value="Kabupaten Contoh Utara">Kabupaten Contoh Utara</option><option value="Kabupaten Contoh Barat">Kabupaten Contoh Barat</option><option value="Kabupaten Contoh Timur">Kabupaten Contoh Timur</option><option value="Kabupaten Contoh Selatan">Kabupaten Contoh Selatan</option>
+    </select></label>
+   </div>
+   <div class="cpcl-donut-layout">
+    <div class="cpcl-donut-wrap"><div class="cpcl-donut" role="img" aria-label="Diagram donat rekap status CPCL">
+     <svg id="cpcl-donut-svg" viewBox="0 0 220 220" aria-hidden="true"></svg>
+     <div class="cpcl-donut-center"><span>Total CPCL</span><strong id="cpcl-total">1.840</strong><small id="cpcl-scope-label">Seluruh Indonesia</small></div>
+    </div></div>
+    <div id="cpcl-donut-legend" class="cpcl-donut-legend" aria-live="polite"></div>
+   </div>
+   <div class="cpcl-chart-note">Angka merupakan ilustrasi pratinjau dan belum terhubung ke rekap CPCL serta hasil verifikasi aktual.</div>
+  </section>
+  <div class="admin-dashboard-grid">
+   <section class="panel"><div class="panel-heading"><div><h2>Akun memerlukan tindakan</h2><p>Verifikasi PIC atau penyelesaian aktivasi.</p></div><button class="text-action" data-action="go-accounts">Buka manajemen akun →</button></div><div id="pending-accounts" class="admin-list"></div></section>
+   <section class="panel"><div class="panel-heading"><div><h2>Aktivitas administrasi</h2><p>Catatan tindakan terakhir pada pratinjau ini.</p></div><button class="text-action" data-action="go-audit">Lihat audit →</button></div><div id="recent-audit" class="admin-list"></div></section>
+  </div>
+  <section class="panel"><div class="panel-heading"><div><h2>Prinsip pengelolaan SITERA</h2><p>Aturan penting untuk administrasi.</p></div></div>
+   <div class="admin-principles">
+    <div><span>01</span><p><strong>Satu akun Pelapor aktif per kabupaten</strong><small>Pergantian PIC mempertahankan akun kabupaten, laporan, dan riwayat aktor.</small></p></div>
+    <div><span>02</span><p><strong>Impor CPCL bersifat tambah saja</strong><small>Data lama tidak ditimpa. Duplikat, konflik dan baris tidak valid dilaporkan terpisah.</small></p></div>
+    <div><span>03</span><p><strong>Aktivitas administratif dapat ditelusuri</strong><small>Audit memuat aktor, waktu, objek, tindakan dan hasil; tanpa sandi/token.</small></p></div>
+   </div>
+  </section>
+ </section>
+
+ <section id="view-accounts" class="view" hidden>
+  <section class="panel table-panel">
+   <div class="panel-heading"><div><h2>Manajemen akun</h2><p>Catat calon pengguna, verifikasi PIC, dan kelola status akses.</p></div><div class="heading-actions"><button class="btn btn-outline btn-sm" data-action="preview-accounts-from-cpcl">Buat calon dari CPCL</button><button class="btn btn-primary btn-sm" data-action="toggle-account-form">+ Tambah akun</button></div></div>
+   <div id="account-form-panel" class="admin-form-panel" hidden>
+    <div class="form-panel-title"><div><h3>Tambah akun secara manual</h3><p>Akun baru dimulai dari status Menunggu verifikasi.</p></div><button class="icon-close" data-action="close-account-form" aria-label="Tutup">×</button></div>
+    <form id="account-form" class="admin-form-grid">
+     <label>Peran<select id="account-role" required><option value="Pelapor">Pelapor Daerah</option><option value="Verifikator">Verifikator Pusat</option><option value="Pimpinan">Pimpinan</option></select></label>
+     <label>Nama PIC / pengguna<input id="account-name" type="text" required placeholder="Nama lengkap"></label>
+     <label>Kontak PIC<input id="account-contact" type="text" placeholder="Nomor kontak (opsional)"></label>
+     <label>Provinsi<input id="account-province" type="text" placeholder="Provinsi"></label>
+     <label id="account-regency-wrap">Kabupaten/Kota<input id="account-regency" type="text" placeholder="Kabupaten/Kota"></label>
+     <label>Username otomatis<input id="account-username" type="text" readonly placeholder="Dibuat otomatis dari kabupaten/kota"></label>
+     <div class="form-wide admin-form-note">Untuk Pelapor, identitas wilayah menggunakan pasangan Provinsi + Kab/Kota. Satu kabupaten maksimal satu akun Pelapor aktif. Kontak/PIC dapat dilengkapi setelah calon akun dicatat.</div>
+     <div class="form-wide form-actions"><button class="btn btn-outline" type="button" data-action="close-account-form">Batal</button><button class="btn btn-primary" type="submit">Simpan calon akun</button></div>
+    </form>
+   </div>
+   <div class="toolbar"><label class="search-control"><span>⌕</span><input id="account-search" type="search" placeholder="Cari username, PIC, provinsi, atau kabupaten"></label>
+    <select class="filter-control" id="account-status-filter"><option value="">Semua status</option><option>Menunggu verifikasi</option><option>Menunggu aktivasi</option><option>Aktif</option><option>Nonaktif</option></select>
+    <select class="filter-control" id="account-role-filter"><option value="">Semua peran</option><option>Pelapor</option><option>Verifikator</option><option>Pimpinan</option></select>
+    <button class="btn btn-outline btn-sm" data-action="reset-account-filters">Reset</button>
+   </div><div id="accounts-table"></div>
+  </section>
+  <div class="admin-footnote"><strong>Catatan kredensial:</strong> penerbitan sandi sementara, unduh XLSX/ZIP sekali, masa berlaku tujuh hari, dan pencabutan sesi belum diaktifkan pada frontend karena wajib dilakukan secara aman di backend. <span>RF11-03–08.</span></div>
+ </section>
+
+ <section id="view-cpcl" class="view" hidden>
+  <section class="panel table-panel">
+   <div class="panel-heading"><div><h2>Referensi CPCL</h2><p>Kelola data kelompok tani dan identitas wilayah pada satu referensi.</p></div><button class="btn btn-primary btn-sm" data-action="toggle-cpcl-form">+ Tambah CPCL</button></div>
+   <div id="cpcl-form-panel" class="admin-form-panel" hidden>
+    <div class="form-panel-title"><div><h3>Tambah CPCL secara manual</h3><p>Data contoh/baru; aturan kolom wajib selain identitas kelompok masih menunggu K07-06.</p></div><button class="icon-close" data-action="close-cpcl-form" aria-label="Tutup">×</button></div>
+    <form id="cpcl-form" class="cpcl-admin-form"><div class="cpcl-fields-grid" id="cpcl-form-fields"></div>
+     <div class="admin-form-note">Kunci identitas sementara prototipe: Provinsi + Kab_Kota + Kecamatan + Desa/Kelurahan + Kel_Tani. Nomor No. bukan kunci unik. Arti Realisasi, kode Keterangan, presisi Luas_ha dan sistem koordinat X/Y masih perlu dikonfirmasi.</div>
+     <div class="form-actions"><button class="btn btn-outline" type="button" data-action="close-cpcl-form">Batal</button><button class="btn btn-primary" type="submit">Simpan CPCL</button></div>
+    </form>
+   </div>
+   <div class="toolbar"><label class="search-control"><span>⌕</span><input id="cpcl-search" type="search" placeholder="Cari Nama DI, kelompok tani, atau wilayah"></label><select class="filter-control" id="cpcl-province-filter"><option value="">Semua provinsi</option></select><select class="filter-control" id="cpcl-regency-filter"><option value="">Semua kabupaten/kota</option></select><button class="btn btn-outline btn-sm" data-action="reset-cpcl-filters">Reset</button></div>
+   <div id="cpcl-table"></div>
+  </section>
+  <section class="panel cpcl-admin-detail" id="cpcl-detail-panel" hidden><div class="panel-heading"><div><h2 id="cpcl-detail-title">Detail CPCL</h2><p>Seluruh 14 kolom menurut Lampiran C.</p></div><button class="btn btn-outline btn-sm" data-action="close-cpcl-detail">Tutup</button></div><div class="cpcl-detail-grid admin-cpcl-detail-grid" id="cpcl-detail-fields"></div></section>
+ </section>
+
+ <section id="view-imports" class="view" hidden>
+  <section class="panel import-panel">
+   <div class="panel-heading"><div><h2>Impor data CPCL</h2><p>Alur tambah saja: unggah, pilih sheet, petakan kolom, validasi, pratinjau, lalu konfirmasi.</p></div><div class="heading-actions"><button class="btn btn-outline btn-sm" data-action="download-template">Template CSV</button><button class="btn btn-outline btn-sm" data-action="download-template-xlsx">Template XLSX</button></div></div>
+   <div class="import-warning"><strong>Perlindungan data lama</strong><span>Impor tidak pernah menimpa CPCL yang sudah ada. Tidak ada data yang disimpan sebelum tombol konfirmasi penambahan ditekan. Formula dan makro tidak dijalankan.</span></div>
+   <div class="import-steps"><div class="import-step active" data-step="1"><span>1</span><strong>Unggah file</strong></div><div class="import-step" data-step="2"><span>2</span><strong>Pilih sheet & petakan</strong></div><div class="import-step" data-step="3"><span>3</span><strong>Validasi & pratinjau</strong></div><div class="import-step" data-step="4"><span>4</span><strong>Konfirmasi penambahan</strong></div></div>
+   <div class="import-stage">
+    <section class="import-upload" id="import-stage-upload"><label class="file-drop" for="import-file"><span class="upload-symbol">⇧</span><strong>Pilih file CSV atau Excel XLSX</strong><small>Format yang didukung: .csv dan .xlsx. Tautan Google Sheets serta XLS lama tidak termasuk.</small><span class="btn btn-outline btn-sm">Pilih file</span><input id="import-file" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></label><div class="import-template-hint">Template berisi seluruh 14 kolom sesuai urutan sumber pada Lampiran C.</div></section>
+    <section id="import-stage-mapping" hidden><div class="import-file-meta" id="import-file-meta"></div><label class="sheet-select-label" id="sheet-select-wrap" hidden>Sheet sumber<select id="import-sheet"></select></label><div class="mapping-heading"><h3>Pemetaan header sumber</h3><p>Pastikan setiap kolom tujuan dipetakan ke header yang benar.</p></div><div id="column-mapping" class="column-mapping"></div><div class="form-actions"><button class="btn btn-outline" data-action="cancel-import">Batal</button><button class="btn btn-primary" data-action="validate-import">Validasi & lihat pratinjau</button></div></section>
+    <section id="import-stage-preview" hidden><div class="import-summary-grid" id="import-summary"></div><div class="preview-legend"><span><i class="legend-dot new"></i>Baru valid</span><span><i class="legend-dot duplicate"></i>Duplikat</span><span><i class="legend-dot conflict"></i>Konflik</span><span><i class="legend-dot invalid"></i>Tidak valid</span></div><div id="import-preview-table"></div><div class="form-actions import-confirm-actions"><button class="btn btn-outline" data-action="back-mapping">Kembali ke pemetaan</button><button class="btn btn-primary" id="confirm-import-button" data-action="confirm-import">Konfirmasi tambah data baru valid</button></div><p class="import-commit-note">Hanya baris Baru valid yang akan ditambahkan. Duplikat, konflik, dan tidak valid dilewati serta dicatat dalam hasil batch.</p></section>
+    <section id="import-stage-result" hidden><div id="import-result-panel" class="import-result-panel"></div><div class="form-actions"><button class="btn btn-primary" data-action="new-import">Impor file lain</button><button class="btn btn-outline" data-action="go-audit">Lihat audit log</button></div></section>
+   </div>
+  </section>
+ </section>
+
+ <section id="view-audit" class="view" hidden>
+  <section class="panel table-panel"><div class="panel-heading"><div><h2>Audit log</h2><p>Riwayat tindakan administratif. Tampilan ini hanya-baca pada pratinjau.</p></div><span class="read-only-chip">Hanya baca</span></div>
+   <div class="toolbar"><label class="search-control"><span>⌕</span><input id="audit-search" type="search" placeholder="Cari aktor, objek, tindakan, atau hasil"></label><select class="filter-control" id="audit-action-filter"><option value="">Semua tindakan</option></select><select class="filter-control" id="audit-result-filter"><option value="">Semua hasil</option><option>Berhasil</option><option>Ditolak</option><option>Gagal</option></select><button class="btn btn-outline btn-sm" data-action="reset-audit-filters">Reset</button></div>
+   <div id="audit-table"></div>
+  </section>
+  <div class="admin-footnote">Audit produksi harus dicatat di server untuk login, perubahan akun/CPCL, impor, unggah, kirim, penilaian, revisi, dan ekspor. Pengguna biasa tidak dapat mengubah atau menghapus catatan log. <span>RF07-29.</span></div>
+ </section>
+</main>
+
+<div id="account-preview-modal" class="admin-modal" hidden><div class="admin-modal-card"><div class="form-panel-title"><div><h3>Pratinjau calon akun dari CPCL</h3><p>Pasangan unik Provinsi + Kab_Kota. Belum ada akun yang dibuat.</p></div><button class="icon-close" data-action="close-account-preview">×</button></div><div id="account-preview-content"></div><div class="form-actions"><button class="btn btn-outline" data-action="close-account-preview">Batal</button><button class="btn btn-primary" data-action="confirm-accounts-from-cpcl">Buat calon akun baru</button></div></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/vendor/xlsx.full.min.js"></script><script src="/sitera/superadmin-review.js"></script>
+<script src="/sitera/sidebar.js"></script>
+</body></html>

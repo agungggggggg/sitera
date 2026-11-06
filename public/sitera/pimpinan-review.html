@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#086288">
+  <meta name="description" content="Pratinjau dashboard Pimpinan SITERA berdasarkan SRS v0.12.">
+  <title>Area Pimpinan — SITERA</title>
+  <link rel="icon" type="image/webp" href="/sitera/sitera-logo.webp">
+  <link rel="stylesheet" href="/sitera/theme.css">
+  <link rel="stylesheet" href="/sitera/pelapor-review.css">
+  <link rel="stylesheet" href="/sitera/pimpinan-review.css">
+</head>
+<body>
+  <div class="prototype-ribbon"><span class="live-dot"></span> PRATINJAU UI/UX <span class="ribbon-divider">•</span> DATA SIMULASI</div>
+  <header class="app-header">
+    <a class="brand" href="/sitera/pimpinan-review.html" aria-label="SITERA beranda">
+      <span class="brand-logo"><img src="/sitera/sitera-logo.webp" alt="Logo Irigasi Pertanian"></span>
+      <span class="brand-copy"><strong>SITERA</strong><small>Sistem Informasi Rekapitulasi & Pemantauan Kegiatan Irigasi Pertanian</small></span>
+    </a>
+    <div class="header-right">
+      <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <span class="internal-tag"><span></span> Sistem internal</span>
+      <button class="icon-button" type="button" aria-label="Notifikasi" id="notification-button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="profile">
+        <span class="avatar">PM</span>
+        <span class="profile-copy"><strong>Pimpinan</strong><small>Monitoring Pusat</small></span>
+      </div>
+      <a class="exit-link" href="/">Keluar demo</a>
+    </div>
+  </header>
+
+  <nav class="main-nav" id="main-nav" aria-label="Navigasi Pimpinan">
+    <button class="nav-item active" data-view="dashboard"><span class="nav-icon">⌂</span>Ringkasan</button>
+    <button class="nav-item" data-view="reports"><span class="nav-icon">▤</span>Rekap Laporan</button>
+  </nav>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+
+  <main class="workspace">
+    <div class="page-heading">
+      <div>
+        <div class="breadcrumb"><span>Ruang Pimpinan</span><span>/</span><strong id="breadcrumb-current">Ringkasan</strong></div>
+        <h1 id="page-title">Ringkasan rekapitulasi</h1>
+        <p id="page-description">Pantau status terkini paket laporan dari seluruh wilayah sesuai izin akun.</p>
+      </div>
+      <div class="heading-actions">
+        <span class="period-chip"><span></span> Data diperbarui · 30 Okt 2026</span>
+        <button class="btn btn-outline btn-sm export-unavailable" type="button" disabled title="Format dan kolom ekspor menunggu keputusan K07-07">Ekspor · Belum ditetapkan</button>
+      </div>
+    </div>
+
+    <div class="notice"><span class="notice-icon">i</span><span><strong>Mode pratinjau.</strong> Seluruh angka, nama wilayah, dan laporan adalah data simulasi. Dashboard ini memantau pelaporan dan pemeriksaan dokumen; bukan pengesahan atau ukuran realisasi fisik irigasi.</span></div>
+
+    <section class="filter-panel panel" aria-label="Filter rekapitulasi">
+      <div class="filter-panel-heading">
+        <div><strong>Filter rekapitulasi</strong><small>Filter dapat digabung; grafik, kartu, dan daftar mengikuti pilihan yang sama.</small></div>
+        <button class="btn btn-outline btn-sm" data-action="reset-filters">Reset filter</button>
+      </div>
+      <div class="toolbar leader-filters">
+        <label class="search-control"><span>⌕</span><input id="report-search" type="search" placeholder="Cari ID laporan, kelompok tani, atau Nama DI"></label>
+        <select class="filter-control" id="filter-province" aria-label="Filter provinsi"><option value="">Semua provinsi</option></select>
+        <select class="filter-control" id="filter-regency" aria-label="Filter kabupaten/kota"><option value="">Semua kabupaten/kota</option></select>
+        <select class="filter-control" id="filter-district" aria-label="Filter kecamatan"><option value="">Semua kecamatan</option></select>
+        <select class="filter-control" id="filter-village" aria-label="Filter desa/kelurahan"><option value="">Semua desa/kelurahan</option></select>
+        <select class="filter-control" id="filter-group" aria-label="Filter kelompok tani"><option value="">Semua kelompok tani</option></select>
+        <select class="filter-control" id="filter-di" aria-label="Filter Nama DI"><option value="">Semua Nama DI</option></select>
+        <select class="filter-control" id="filter-status" aria-label="Filter status">
+          <option value="">Semua status</option><option>Draf</option><option>Menunggu pemeriksaan</option><option>Tidak sesuai</option><option>Sesuai</option>
+        </select>
+        <label class="date-filter"><span>Tanggal kirim · Dari</span><input class="filter-control" id="filter-from" type="date" aria-label="Tanggal kirim dari"></label>
+        <label class="date-filter"><span>Tanggal kirim · Sampai</span><input class="filter-control" id="filter-to" type="date" aria-label="Tanggal kirim sampai"></label>
+        <select class="filter-control sort-filter" id="filter-sort" aria-label="Urutkan data">
+          <option value="updated-desc">Pembaruan terbaru</option><option value="updated-asc">Pembaruan terlama</option>
+          <option value="kab-asc">Kabupaten A–Z</option><option value="kab-desc">Kabupaten Z–A</option>
+          <option value="group-asc">Kelompok A–Z</option><option value="group-desc">Kelompok Z–A</option>
+          <option value="di-asc">Nama DI A–Z</option><option value="di-desc">Nama DI Z–A</option>
+        </select>
+      </div>
+      <div class="filter-feedback"><span id="filter-summary">Semua wilayah · Semua status</span><strong id="result-count">0 paket</strong></div>
+    </section>
+
+    <section id="view-dashboard" class="view active">
+      <div class="metrics-grid leader-metrics" id="leader-metrics"></div>
+
+      <div class="leader-grid">
+        <section class="panel chart-panel cpcl-donut-panel">
+          <div class="panel-heading cpcl-chart-heading">
+            <div><h2>Rekap Status CPCL</h2><p>Jumlah CPCL berdasarkan status pelaporan BAST.</p></div>
+            <label class="cpcl-scope-control"><span>Cakupan diagram</span><select id="cpcl-chart-regency" class="filter-control" aria-label="Pilih cakupan diagram donat">
+              <option value="Nasional">Nasional</option>
+              <option value="Kabupaten Contoh Utara">Kabupaten Contoh Utara</option>
+              <option value="Kabupaten Contoh Barat">Kabupaten Contoh Barat</option>
+              <option value="Kabupaten Contoh Timur">Kabupaten Contoh Timur</option>
+              <option value="Kabupaten Contoh Selatan">Kabupaten Contoh Selatan</option>
+            </select></label>
+          </div>
+          <div class="cpcl-donut-layout">
+            <div class="cpcl-donut-wrap">
+              <div class="cpcl-donut" role="img" aria-label="Diagram donat rekap status CPCL">
+                <svg id="cpcl-donut-svg" viewBox="0 0 220 220" aria-hidden="true"></svg>
+                <div class="cpcl-donut-center">
+                  <span>Total CPCL</span>
+                  <strong id="cpcl-total">1.840</strong>
+                  <small id="cpcl-scope-label">Nasional</small>
+                </div>
+              </div>
+            </div>
+            <div id="cpcl-donut-legend" class="cpcl-donut-legend" aria-live="polite"></div>
+          </div>
+          <div class="cpcl-chart-note">Angka saat ini merupakan ilustrasi untuk pratinjau UI/UX. Nilai final harus mengikuti data CPCL dan hasil pemeriksaan aktual.</div>
+        </section>
+        <section class="panel completeness-panel">
+          <div class="panel-heading"><div><h2>Kelengkapan dokumen</h2><p>Ketersediaan tiga bagian terpisah dari hasil pemeriksaan.</p></div></div>
+          <div id="completeness-list" class="completeness-list"></div>
+          <div class="helper-note"><span>ⓘ</span> Dokumen lengkap tidak otomatis berarti laporan berstatus Sesuai.</div>
+        </section>
+      </div>
+
+      <div class="leader-grid leader-lower-grid">
+        <section class="panel table-panel">
+          <div class="panel-heading"><div><h2>Antrean menunggu terlama</h2><p>Urutan berdasarkan tanggal kirim paling lama; bukan target SLA.</p></div><button class="text-action" data-action="go-reports">Buka rekap →</button></div>
+          <div id="oldest-queue"></div>
+        </section>
+        <section class="panel table-panel">
+          <div class="panel-heading"><div><h2>Perlu tindak lanjut</h2><p>Paket berstatus Tidak sesuai.</p></div></div>
+          <div id="followup-list"></div>
+        </section>
+      </div>
+      <div class="leader-caveat"><strong>Catatan cakupan:</strong> Diagram donat merangkum seluruh CPCL pada cakupan wilayah yang dipilih. Angkanya masih ilustrasi; setelah data CPCL dan hasil pemeriksaan terhubung, angka akan dihitung otomatis dari data aktual. Filter laporan tetap berlaku untuk kartu dan tabel rekap.</div>
+    </section>
+
+    <section id="view-reports" class="view" hidden>
+      <section class="panel table-panel">
+        <div class="panel-heading"><div><h2>Rekap paket laporan</h2><p>Daftar laporan seluruh wilayah sesuai izin akun Pimpinan.</p></div><span class="version-chip">Ringkasan seluruh versi terkini</span></div>
+        <div id="reports-table"></div>
+      </section>
+    </section>
+
+    <section id="view-detail" class="view" hidden>
+      <div class="detail-back"><button class="btn btn-outline btn-sm" data-action="back-reports">← Kembali ke rekap</button><span id="detail-status"></span></div>
+      <div class="leader-detail-grid">
+        <section class="panel">
+          <div class="panel-heading"><div><span class="section-kicker">IDENTITAS PAKET LAPORAN</span><h2 id="detail-id">—</h2><p id="detail-subtitle">—</p></div><span class="version-chip" id="detail-version">Versi —</span></div>
+          <div id="detail-fields" class="cpcl-detail-grid leader-detail-fields"></div>
+        </section>
+        <section class="panel document-panel">
+          <div class="panel-heading"><div><h2>Ketersediaan dokumen</h2><p>Ringkasan tiga bagian pada versi terkini.</p></div></div>
+          <div id="detail-documents" class="review-documents"></div>
+        </section>
+      </div>
+      <div class="leader-detail-note">Tampilan detail ini berisi data simulasi untuk meninjau struktur rekap. Akses aktual ke berkas dan detail akan ditentukan oleh otorisasi server.</div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/sitera/pimpinan-review.js"></script>
+<script src="/sitera/sidebar.js"></script>
+</body>
+</html>

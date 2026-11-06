@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#086288">
+  <meta name="description" content="Pratinjau UI/UX halaman Verifikator SITERA berdasarkan SRS v0.12.">
+  <title>Area Verifikator — SITERA</title>
+  <link rel="icon" type="image/webp" href="/sitera/sitera-logo.webp">
+  <link rel="stylesheet" href="/sitera/theme.css">
+  <link rel="stylesheet" href="/sitera/pelapor-review.css">
+  <link rel="stylesheet" href="/sitera/verifikator-review.css">
+</head>
+<body>
+  <div class="prototype-ribbon"><span class="live-dot"></span> PRATINJAU UI/UX <span class="ribbon-divider">•</span> DATA SIMULASI</div>
+  <header class="app-header">
+    <a class="brand" href="/sitera/verifikator-review.html" aria-label="SITERA beranda">
+      <span class="brand-logo"><img src="/sitera/sitera-logo.webp" alt="Logo Irigasi Pertanian"></span>
+      <span class="brand-copy"><strong>SITERA</strong><small>Sistem Informasi Rekapitulasi & Pemantauan Kegiatan Irigasi Pertanian</small></span>
+    </a>
+    <div class="header-right">
+      <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <span class="internal-tag"><span></span> Sistem internal</span>
+      <button class="icon-button" type="button" aria-label="Notifikasi" id="notification-button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="profile">
+        <span class="avatar">VP</span>
+        <span class="profile-copy"><strong>Verifikator Pusat</strong><small>Petugas Pemeriksa</small></span>
+      </div>
+      <a class="exit-link" href="/">Keluar demo</a>
+    </div>
+  </header>
+
+  <nav class="main-nav" id="main-nav" aria-label="Navigasi Verifikator">
+    <button class="nav-item active" data-view="dashboard"><span class="nav-icon">⌂</span>Ringkasan</button>
+    <button class="nav-item" data-view="queue"><span class="nav-icon">▤</span>Antrean Pemeriksaan <span class="nav-count" id="queue-count">0</span></button>
+    <button class="nav-item" data-view="history"><span class="nav-icon">◷</span>Riwayat Pemeriksaan</button>
+  </nav>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+
+  <main class="workspace">
+    <div class="page-heading">
+      <div>
+        <div class="breadcrumb"><span>Ruang Verifikator</span><span>/</span><strong id="breadcrumb-current">Ringkasan</strong></div>
+        <h1 id="page-title">Ringkasan pemeriksaan</h1>
+        <p id="page-description">Periksa laporan dari seluruh wilayah sesuai kewenangan akun Anda.</p>
+      </div>
+      <div class="heading-actions"><span class="period-chip"><span></span> Pembaruan data · 30 Okt 2026</span></div>
+    </div>
+
+    <div class="notice"><span class="notice-icon">i</span><span><strong>Mode pratinjau.</strong> Seluruh nama, wilayah, angka, dan nama dokumen merupakan data simulasi. Penilaian disimpan di browser ini, belum ke server.</span></div>
+
+    <section id="view-dashboard" class="view active">
+      <div class="metrics-grid verifier-metrics" id="dashboard-metrics"></div>
+  <section class="panel cpcl-donut-panel role-cpcl-donut">
+   <div class="panel-heading cpcl-chart-heading">
+    <div><h2>Rekap Status CPCL</h2><p>Jumlah CPCL berdasarkan status pelaporan BAST.</p></div>
+    <label class="cpcl-scope-control"><span>Cakupan diagram</span><select id="cpcl-chart-regency" class="filter-control" aria-label="Pilih cakupan diagram donat">
+     <option value="Nasional">Nasional</option><option value="Kabupaten Contoh Utara">Kabupaten Contoh Utara</option><option value="Kabupaten Contoh Barat">Kabupaten Contoh Barat</option><option value="Kabupaten Contoh Timur">Kabupaten Contoh Timur</option><option value="Kabupaten Contoh Selatan">Kabupaten Contoh Selatan</option>
+    </select></label>
+   </div>
+   <div class="cpcl-donut-layout">
+    <div class="cpcl-donut-wrap"><div class="cpcl-donut" role="img" aria-label="Diagram donat rekap status CPCL">
+     <svg id="cpcl-donut-svg" viewBox="0 0 220 220" aria-hidden="true"></svg>
+     <div class="cpcl-donut-center"><span>Total CPCL</span><strong id="cpcl-total">1.840</strong><small id="cpcl-scope-label">Seluruh Indonesia</small></div>
+    </div></div>
+    <div id="cpcl-donut-legend" class="cpcl-donut-legend" aria-live="polite"></div>
+   </div>
+   <div class="cpcl-chart-note">Angka merupakan ilustrasi pratinjau dan belum terhubung ke rekap CPCL serta hasil verifikasi aktual.</div>
+  </section>
+      <div class="content-grid">
+        <section class="panel">
+          <div class="panel-heading"><div><h2>Antrean terbaru</h2><p>Laporan yang menunggu satu hasil pemeriksaan gabungan</p></div><button class="text-action" data-action="go-queue">Buka antrean →</button></div>
+          <div class="activity-list" id="recent-queue"></div>
+        </section>
+        <section class="panel info-panel">
+          <div class="panel-heading"><div><h2>Panduan pemeriksaan</h2><p>Ketentuan hasil sesuai SRS v0.12</p></div></div>
+          <div class="review-guide">
+            <div><span class="guide-mark green">✓</span><p><strong>Sesuai</strong><small>Hasil gabungan; catatan tidak wajib.</small></p></div>
+            <div><span class="guide-mark red">!</span><p><strong>Tidak sesuai</strong><small>Wajib mengisi catatan teks yang jelas.</small></p></div>
+            <div><span class="guide-mark blue">i</span><p><strong>Periksa tiga bagian</strong><small>BAST PDF, LPJ PDF, dan dokumentasi PPTX.</small></p></div>
+          </div>
+          <div class="helper-note"><span>ⓘ</span> Hasil Sesuai mengakhiri pemeriksaan, bukan pengesahan atau persetujuan pimpinan.</div>
+        </section>
+      </div>
+      <section class="panel table-panel">
+        <div class="panel-heading"><div><h2>Perlu ditindaklanjuti</h2><p>Paket berstatus Tidak sesuai menunggu perbaikan dari Pelapor</p></div><button class="text-action" data-action="go-history">Lihat riwayat →</button></div>
+        <div id="needs-followup"></div>
+      </section>
+    </section>
+
+    <section id="view-queue" class="view" hidden>
+      <section class="panel table-panel">
+        <div class="panel-heading"><div><h2>Antrean pemeriksaan</h2><p>Seluruh laporan lintas wilayah sesuai izin Verifikator. Draf tidak masuk antrean.</p></div></div>
+        <div class="toolbar">
+          <label class="search-control"><span>⌕</span><input id="queue-search" type="search" placeholder="Cari ID, kelompok tani, Nama DI, atau kabupaten"></label>
+          <select class="filter-control" id="queue-province" aria-label="Filter provinsi"><option value="">Semua provinsi</option><option>Provinsi Ilustrasi A</option><option>Provinsi Ilustrasi B</option><option>Provinsi Ilustrasi C</option></select>
+          <select class="filter-control" id="queue-regency" aria-label="Filter kabupaten"><option value="">Semua kabupaten/kota</option><option>Kabupaten Contoh Utara</option><option>Kabupaten Contoh Barat</option><option>Kabupaten Contoh Timur</option><option>Kabupaten Contoh Selatan</option></select>
+          <select class="filter-control" id="queue-sort" aria-label="Urutkan antrean"><option value="date-asc">Terlama menunggu</option><option value="date-desc">Terbaru dikirim</option><option value="group-asc">Kelompok A–Z</option><option value="group-desc">Kelompok Z–A</option></select>
+          <button class="btn btn-outline btn-sm" data-action="reset-queue">Reset</button>
+        </div>
+        <div id="queue-table"></div>
+      </section>
+    </section>
+
+    <section id="view-history" class="view" hidden>
+      <section class="panel table-panel">
+        <div class="panel-heading"><div><h2>Riwayat pemeriksaan</h2><p>Hasil gabungan yang telah diberikan pada versi laporan tertentu.</p></div></div>
+        <div class="toolbar">
+          <label class="search-control"><span>⌕</span><input id="history-search" type="search" placeholder="Cari ID, kelompok tani, Nama DI, atau kabupaten"></label>
+          <select class="filter-control" id="history-result" aria-label="Filter hasil"><option value="">Semua hasil</option><option>Sesuai</option><option>Tidak sesuai</option></select>
+          <select class="filter-control" id="history-sort" aria-label="Urutkan riwayat"><option value="date-desc">Pemeriksaan terbaru</option><option value="date-asc">Pemeriksaan terlama</option></select>
+        </div>
+        <div id="history-table"></div>
+      </section>
+    </section>
+
+    <section id="view-detail" class="view" hidden>
+      <div class="detail-back"><button class="btn btn-outline btn-sm" data-action="back-queue">← Kembali ke antrean</button><span class="detail-state" id="detail-state"></span></div>
+      <div class="review-detail-grid">
+        <div class="review-main-column">
+          <section class="panel">
+            <div class="panel-heading"><div><span class="section-kicker">IDENTITAS LAPORAN</span><h2 id="detail-id">—</h2><p id="detail-subtitle">—</p></div><span id="detail-status"></span></div>
+            <div class="cpcl-detail-grid review-cpcl-grid" id="detail-cpcl"></div>
+          </section>
+          <section class="panel document-panel">
+            <div class="panel-heading"><div><h2>Dokumen yang diperiksa</h2><p>Ketiga bagian dinilai sebagai satu paket, bukan hasil terpisah.</p></div><span class="version-chip" id="detail-version">Versi 1</span></div>
+            <div id="detail-documents" class="review-documents"></div>
+          </section>
+          <section class="panel history-panel">
+            <div class="panel-heading"><div><h2>Riwayat versi dan pemeriksaan</h2><p>Versi sebelumnya tetap tercatat.</p></div></div>
+            <div id="detail-history" class="review-history-list"></div>
+          </section>
+        </div>
+        <aside class="panel review-action-panel">
+          <div class="panel-heading"><div><h2>Hasil pemeriksaan gabungan</h2><p>Pilih satu hasil untuk versi yang sedang diperiksa.</p></div></div>
+          <div class="review-rules">
+            <div><span class="guide-mark green">✓</span><span><strong>Sesuai</strong><small>Tidak memerlukan catatan wajib.</small></span></div>
+            <div><span class="guide-mark red">!</span><span><strong>Tidak sesuai</strong><small>Catatan teks wajib diisi.</small></span></div>
+          </div>
+          <label class="review-note-label" for="review-note">Catatan pemeriksaan <span id="note-required">Wajib untuk Tidak sesuai</span></label>
+          <textarea id="review-note" rows="6" placeholder="Tuliskan bagian yang perlu diperbaiki dan alasan pemeriksaan."></textarea>
+          <p class="review-note-help">Catatan ditampilkan kepada Pelapor pada laporan terkait. Lampiran catatan tidak diwajibkan.</p>
+          <div class="review-form-error" id="review-error" role="alert" hidden></div>
+          <div class="review-actions">
+            <button class="btn btn-outline" data-action="submit-review" data-result="Tidak sesuai">Tidak sesuai</button>
+            <button class="btn btn-primary" data-action="submit-review" data-result="Sesuai">Sesuai</button>
+          </div>
+          <p class="page-footnote">Hasil hanya berlaku untuk versi yang tampil. Versi usang atau status yang sudah berubah tidak boleh dinilai ulang.</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/sitera/verifikator-review.js"></script>
+<script src="/sitera/sidebar.js"></script>
+</body>
+</html>

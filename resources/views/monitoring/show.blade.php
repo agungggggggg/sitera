@@ -1,0 +1,22 @@
+@extends('layouts.sitera-executive')
+
+@section('title', 'Detail Paket Laporan — SITERA')
+
+@section('content')
+@php
+    $label = $report->status === 'DRAF' ? 'Draf' : ($report->verification?->hasil === 'SESUAI' ? 'Sesuai' : ($report->verification?->hasil === 'TIDAK_SESUAI' ? 'Tidak sesuai' : 'Menunggu pemeriksaan'));
+    $attachments = $report->attachments->where('versi', $report->versi)->sortByDesc('id');
+    $categories = ['BAST' => ['BAST','PDF'], 'LPJ' => ['LPJ','PDF'], 'DOKUMENTASI' => ['Dokumentasi','PPTX']];
+@endphp
+<div class="page-heading"><div><div class="breadcrumb"><a href="{{ route('monitoring.index') }}">Rekap Laporan</a><span>/</span><strong>Detail</strong></div><h1>Detail paket laporan</h1><p>{{ $report->nomor_tiket }} · diperbarui {{ $report->updated_at?->format('d M Y H:i') }} WIB</p></div><div class="heading-actions"><span class="status {{ Str::slug($label) }}">{{ $label }}</span><span class="version-chip">Versi {{ $report->versi }}</span></div></div>
+<div class="notice"><span class="notice-icon">i</span><span>Ruang Pimpinan adalah tampilan <strong>baca saja</strong>. Isi dokumen tidak diunduh atau diubah dari halaman ini.</span></div>
+<div class="detail-back"><a class="btn btn-outline btn-sm" href="{{ route('monitoring.index', request()->query()) }}">← Kembali ke rekap</a><span class="detail-state">Status: {{ $label }}</span></div>
+<div class="leader-detail-grid"><div class="panel"><div class="panel-heading"><div><span class="section-kicker">IDENTITAS PAKET LAPORAN</span><h2>{{ $report->nomor_tiket }}</h2><p>{{ $report->cpclRecord?->kel_tani ?? 'Kelompok tani belum terhubung ke master CPCL' }} · {{ $report->cpclRecord?->nama_di ?? $report->nama_saluran ?? 'Nama DI belum tersedia' }}</p></div><span class="status {{ Str::slug($label) }}">{{ $label }}</span></div><div class="cpcl-detail-grid leader-detail-fields">@foreach ([['No. CPCL',$report->cpclRecord?->no],['Kewenangan',$report->cpclRecord?->kewenangan],['Keterangan',$report->cpclRecord?->keterangan],['Provinsi',$report->provinsi],['Kabupaten/Kota',$report->kabupaten],['Kecamatan',$report->kecamatan],['Desa/Kelurahan',$report->desa],['Kelompok Tani',$report->cpclRecord?->kel_tani],['Nama Ketua',$report->cpclRecord?->nama_ketua],['Realisasi',$report->cpclRecord?->realisasi],['Luas (ha)',$report->cpclRecord?->luas_ha],['Nama DI',$report->cpclRecord?->nama_di ?? $report->nama_saluran],['Tanggal laporan',$report->tanggal_kejadian?->format('d M Y')],['Tanggal kirim',$report->dikirim_pada?->format('d M Y H:i')],['Versi',$report->versi]] as [$field,$value])<div class="detail-field"><small>{{ $field }}</small><strong>{{ $value ?: '—' }}</strong></div>@endforeach</div></div>
+<section class="panel document-panel"><div class="panel-heading"><div><h2>Ketersediaan dokumen</h2><p>Ringkasan tiga kategori pada versi saat ini. Isi file tidak tersedia pada akun Pimpinan.</p></div></div><div class="review-documents">@foreach ($categories as $category => [$name,$format])@php($file=$attachments->where('kategori',$category)->first())<div class="review-document"><span class="review-document-mark {{ $format === 'PPTX' ? 'pptx' : '' }}">{{ $format }}</span><span class="review-document-copy"><strong>{{ $file?->original_name ?? $name.' belum diunggah' }}</strong><small>{{ $name }} · {{ $format }} · {{ $file ? number_format($file->size_bytes / 1048576, 2, ',', '.').' MB' : 'Tidak tersedia pada versi ini' }}</small></span><span class="review-document-meta">{{ $file ? 'Tersedia' : 'Belum tersedia' }}</span></div>@endforeach</div><div class="leader-caveat">Kelengkapan lampiran menunjukkan berkas tersimpan, bukan penilaian atau pengesahan hasil kegiatan.</div></section></div>
+@endsection
+@push('styles')<style>.leader-detail-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:15px;align-items:start}.leader-detail-fields{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 18px 18px}.leader-caveat{margin:8px 18px 15px;padding:10px;border-radius:7px;background:var(--blue-tint);color:#66808b;font-size:9px;line-height:1.5}.review-document-meta{font-size:9px;color:#71858e}.detail-back{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.detail-state{color:#81949c;font-size:10px}@media(max-width:900px){.leader-detail-grid{grid-template-columns:1fr}}@media(max-width:620px){.leader-detail-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>@endpush
+  
+  
+  
+  
+  

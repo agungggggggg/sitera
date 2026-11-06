@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#086288">
+  <meta name="description" content="Pratinjau portal internal SITERA untuk pelaporan, pemeriksaan dokumen, dan rekapitulasi kegiatan irigasi tersier.">
+  <title>SITERA — Sistem Informasi Irigasi Tersier</title>
+  <link rel="icon" type="image/webp" href="/sitera/sitera-logo.webp">
+  <link rel="stylesheet" href="/sitera/app.css">
+  <link rel="stylesheet" href="/sitera/theme.css">
+  <!-- Login kembali menggunakan stylesheet awal. -->
+</head>
+<body>
+  <div class="prototype-flag"><span class="flag-dot"></span> PROTOTIPE REVIEW <span class="flag-sep">•</span> DATA SIMULASI</div>
+
+  <section id="login-screen" class="login-screen">
+    <div class="login-visual">
+      <div class="login-brand">
+        <div class="brand-emblem brand-logo"><img src="/sitera/sitera-logo.webp" alt="Logo Irigasi Pertanian"></div>
+        <div><span class="brand-kicker">KEMENTERIAN PERTANIAN</span><strong>SITERA</strong><span class="brand-full">Sistem Informasi Irigasi Tersier</span></div>
+      </div>
+      <div class="visual-copy">
+        <span class="eyebrow light-eyebrow">SATU PINTU PELAPORAN</span>
+        <h1>Alur laporan lebih tertata.<br><em>Informasi lebih terlacak.</em></h1>
+        <p>Ruang kerja internal untuk mengirim laporan kegiatan irigasi, memeriksa dokumen, dan memantau status pelaporan dari daerah.</p>
+      </div>
+      <div class="water-art" aria-hidden="true">
+        <svg viewBox="0 0 670 320" preserveAspectRatio="xMidYMid meet">
+          <path d="M-15 220 C95 180 130 240 224 208 S380 166 460 204 590 235 690 190" fill="none" stroke="#c0e5ef" stroke-width="2" opacity=".7"/>
+          <path d="M-20 244 C75 208 150 273 244 235 S390 197 474 234 598 263 700 220" fill="none" stroke="#a9d5b2" stroke-width="2" opacity=".55"/>
+          <path d="M-20 270 C75 235 150 298 244 261 S390 224 474 260 598 289 700 246" fill="none" stroke="#a9d5b2" stroke-width="2" opacity=".42"/>
+          <path d="M270 320 366 116 458 320M316 218h96M294 266h144" fill="none" stroke="#d5edf3" stroke-width="1.5" opacity=".5"/>
+          <path d="M345 320V136M345 136l-44 22M345 136l44 22" fill="none" stroke="#d1ead5" stroke-width="2" opacity=".55"/>
+          <circle cx="345" cy="136" r="8" fill="#d1ead5" opacity=".8"/>
+          <g fill="#d1ead5" opacity=".8"><circle cx="470" cy="84" r="3"/><circle cx="505" cy="104" r="2"/><circle cx="546" cy="60" r="2.5"/><circle cx="180" cy="110" r="2"/><circle cx="216" cy="78" r="3"/></g>
+        </svg>
+      </div>
+      <div class="visual-bottom"><span>TERINTEGRASI DALAM SATU ALUR</span><span>INTERNAL • TERBATAS</span></div>
+    </div>
+    <div class="login-panel">
+      <div class="login-card">
+        <div class="mobile-brand"><div class="brand-emblem small-emblem brand-logo"><img src="/sitera/sitera-logo.webp" alt="Logo Kementerian Pertanian"></div><strong>SITERA</strong></div>
+        <span class="eyebrow">PORTAL INTERNAL</span>
+        <h2>Selamat Datang</h2>
+        <p class="login-intro">Masuk ke ruang kerja pelaporan dan pemeriksaan dokumen kegiatan irigasi.</p>
+        <form id="login-demo-form" class="login-fields">
+          <div class="login-field"><label for="demo-username">Username / Email</label><div class="login-input-wrap"><span class="input-symbol" aria-hidden="true">♙</span><input id="demo-username" type="text" autocomplete="username" placeholder="Masukkan username atau email"></div></div>
+          <div class="login-field"><label for="demo-password">Password</label><div class="login-input-wrap"><span class="input-symbol" aria-hidden="true">⌑</span><input id="demo-password" type="password" autocomplete="current-password" placeholder="Masukkan password"><button type="button" id="toggle-password" class="password-toggle" aria-label="Tampilkan password">◉</button></div></div>
+          <div class="login-options"><label class="remember-option"><input type="checkbox" id="remember-session"><span>Ingat saya</span></label><button type="button" class="text-link" id="forgot-password">Lupa password?</button></div>
+          <select id="demo-role" class="sr-only" aria-label="Peran demo">
+            <option value="pelapor">Pelapor Daerah</option>
+            <option value="verifikator">Verifikator Pusat</option>
+            <option value="pimpinan">Pimpinan</option>
+            <option value="admin">Super Admin</option>
+          </select>
+          <button id="enter-demo" type="button" class="btn btn-primary btn-full">Masuk <span aria-hidden="true">↗</span></button>
+        </form>
+        <div class="login-mode-note"><span class="mode-note-dot"></span><span><strong>Mode pratinjau.</strong> Login belum terhubung ke autentikasi. Area Pelapor tersedia; halaman Verifikator, Pimpinan, dan Super Admin sedang diselaraskan dengan SRS v0.12.</span></div>
+        <div class="login-divider"><span>ATAU PILIH PERAN DEMO</span></div>
+        <div class="demo-role-grid" role="group" aria-label="Pilih peran demo">
+          <button type="button" class="demo-role-card selected" data-login-role="pelapor"><span class="role-icon">♙</span><span class="role-card-text"><strong>Pelapor Daerah</strong><small>Pelaporan dokumen</small></span><span class="role-check">✓</span></button>
+          <button type="button" class="demo-role-card" data-login-role="verifikator"><span class="role-icon">✓</span><span class="role-card-text"><strong>Verifikator Pusat</strong><small>Pemeriksaan laporan</small></span><span class="role-check">✓</span></button>
+          <button type="button" class="demo-role-card" data-login-role="pimpinan"><span class="role-icon">▥</span><span class="role-card-text"><strong>Pimpinan</strong><small>Rekapitulasi laporan</small></span><span class="role-check">✓</span></button>
+          <button type="button" class="demo-role-card" data-login-role="admin"><span class="role-icon">⚙</span><span class="role-card-text"><strong>Super Admin</strong><small>Kelola akun dan CPCL</small></span><span class="role-check">✓</span></button>
+        </div>
+        <p class="login-legal">SITERA · Sistem Informasi Irigasi Tersier · Kementerian Pertanian Pasar Minggu</p>
+      </div>
+      <div class="panel-footer">Kementerian Pertanian · Pasar Minggu <span>Versi UI 0.1</span></div>
+    </div>
+  </section>
+
+  <section id="app-screen" class="app-screen" hidden>
+    <header class="topbar">
+      <a href="#" class="top-brand" aria-label="SITERA beranda" data-page="dashboard"><div class="brand-emblem top-emblem brand-logo"><img src="/sitera/sitera-logo.webp" alt="Logo Kementerian Pertanian"></div><span><strong>SITERA</strong><small>IRIGASI TERSIER</small></span></a>
+      <div class="topbar-right">
+        <div class="internal-pill"><span></span> Sistem internal</div>
+        <button class="icon-button notification-button" aria-label="Notifikasi" id="notification-button"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><i></i></button>
+        <div class="profile-area"><div class="avatar" id="avatar">PD</div><div class="profile-text"><strong id="profile-name">Pelapor Daerah</strong><span id="profile-role">Pelapor</span></div><button id="profile-menu" class="profile-caret" aria-label="Ganti peran">⌄</button></div>
+        <button id="exit-demo" class="exit-button">Keluar</button>
+      </div>
+    </header>
+
+    <nav class="main-nav" aria-label="Navigasi utama">
+      <button class="nav-link active" data-page="dashboard"><span class="nav-symbol">⌂</span>Ringkasan</button>
+      <button class="nav-link" data-page="usulan"><span class="nav-symbol">▤</span>Usulan</button>
+      <button class="nav-link" data-page="verifikasi"><span class="nav-symbol">✓</span>Pemeriksaan usulan <span class="nav-count" id="review-count">3</span></button>
+      <button class="nav-link" data-page="laporan"><span class="nav-symbol">▧</span>Laporan</button>
+      <button class="nav-link" data-page="monitoring"><span class="nav-symbol">◫</span>Monitoring</button>
+      <button class="nav-link" data-page="cpcl"><span class="nav-symbol">⌕</span>Referensi CPCL</button>
+      <button class="nav-link" data-page="admin" id="admin-nav"><span class="nav-symbol">⚙</span>Administrasi</button>
+    </nav>
+
+    <main class="workspace">
+      <div class="page-heading">
+        <div><div class="breadcrumb"><span>Ruang kerja</span><span class="crumb-arrow">/</span><strong id="breadcrumb-current">Ringkasan</strong></div><h1 id="page-title">Ringkasan dashboard</h1><p id="page-subtitle">Pantau alur usulan dan laporan dalam satu tempat.</p></div>
+        <div class="heading-actions"><span class="period-label"><span class="period-dot"></span>Periode data · 2026</span><button id="primary-action" class="btn btn-primary"><span class="plus-icon">+</span><span>Buat usulan</span></button></div>
+      </div>
+      <div class="notice-strip"><span class="notice-icon">i</span><span><strong>Mode prototipe.</strong> Konten yang ditampilkan merupakan data contoh untuk review kebutuhan, bukan data operasional Kementan.</span><button id="dismiss-notice" aria-label="Tutup pemberitahuan">×</button></div>
+      <div id="page-content" class="page-content" aria-live="polite"></div>
+      <footer class="workspace-footer"><span>© 2026 · SITERA — Sistem Informasi Irigasi Tersier</span><span>Rancangan berdasarkan SRS v0.6 <span class="footer-sep">•</span> <span class="footer-muted">Belum disahkan untuk produksi</span></span></footer>
+    </main>
+  </section>
+
+  <div id="modal-root"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/sitera/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+/* SITERA brand refresh — client direction: blue #086288 + white */
+:root {
+  --brand: #086288;
+  --brand-hover: #064d69;
+  --brand-deep: #063d53;
+  --brand-soft: #e8f4f8;
+  --brand-tint: #f2f8fb;
+  --brand-line: #cfe2ea;
+
+  /* Backward-compatible aliases used by the existing prototype styles */
+  --green-950: #063d53;
+  --green-900: var(--brand);
+  --green-800: #0b7093;
+  --green-700: #1680a4;
+  --green-600: #2796b8;
+  --green-100: #e3f1f6;
+  --green-50: #f2f8fb;
+
+  --ink: #17323d;
+  --muted: #6c818b;
+  --line: #dce8ed;
+  --surface: #ffffff;
+  --canvas: #f5f9fb;
+  --blue: var(--brand);
+  --blue-bg: var(--brand-soft);
+  --shadow: 0 16px 40px rgba(8, 98, 136, .10);
+}
+
+/* Core brand surfaces */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline-color: #83c5d9;
+}
+
+.login-screen { background: #ffffff; }
+.login-visual {
+  background: linear-gradient(145deg, #063d53 0%, #086288 54%, #1280a4 100%);
+}
+.login-visual:after {
+  border-color: #ffffff18;
+  box-shadow: 0 0 0 55px #ffffff09, 0 0 0 110px #ffffff05;
+}
+.light-eyebrow { color: #c2e8f2; }
+.visual-copy h1 em { color: #c2e8f2; }
+.visual-copy p { color: #d2eaf1; }
+.visual-bottom { color: #c2e3ed; }
+.brand-full { color: #d3eaf1; }
+
+/* Logo supplied by the client: white backing keeps its dark-blue mark legible */
+.brand-logo {
+  background: #ffffff !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  overflow: hidden !important;
+}
+.login-brand .brand-logo { width: 58px; height: 58px; }
+.mobile-brand .brand-logo { width: 42px; height: 42px; }
+.top-brand .brand-logo { width: 44px; height: 44px; }
+
+/* Primary actions and navigation */
+.btn-primary {
+  background: var(--brand) !important;
+  box-shadow: 0 4px 10px rgba(8, 98, 136, .14) !important;
+}
+.btn-primary:hover { background: var(--brand-hover) !important; }
+.btn-secondary {
+  color: var(--brand) !important;
+  background: var(--brand-soft) !important;
+  border-color: var(--brand-line) !important;
+}
+.btn-outline {
+  color: var(--brand) !important;
+  border-color: var(--brand-line) !important;
+}
+.eyebrow, .text-link, .panel-action, .ticket-code,
+.top-brand small, .nav-link.active, .nav-link:hover {
+  color: var(--brand) !important;
+}
+.nav-link.active:after { background: var(--brand) !important; }
+.nav-link.active .nav-symbol { color: var(--brand) !important; }
+.internal-pill { border-color: var(--brand-line); color: #386b80; }
+.internal-pill span, .period-dot { background: var(--brand); }
+.icon-button { background: var(--brand-tint); color: #376d82; }
+.avatar {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  color: var(--brand);
+}
+
+/* Inputs and selected controls */
+.remember-option input { accent-color: var(--brand) !important; }
+.login-input-wrap input:focus {
+  border-color: #75b6cd !important;
+  box-shadow: 0 0 0 3px rgba(8, 98, 136, .12) !important;
+}
+.combo-wrap .usulan-combo:focus {
+  border-color: #75b6cd !important;
+  box-shadow: 0 0 0 3px rgba(8, 98, 136, .10) !important;
+}
+.combo-option:hover, .combo-option:focus {
+  background: var(--brand-soft) !important;
+}
+.demo-role-card.selected {
+  border-color: #70b3cb !important;
+  background: var(--brand-tint) !important;
+  box-shadow: inset 0 0 0 1px #70b3cb !important;
+}
+.role-icon, .quick-icon, .metric-icon:not(.amber):not(.rose),
+.section-number, .document-icon {
+  background: var(--brand-soft) !important;
+  color: var(--brand) !important;
+}
+.text-link:hover, .panel-action:hover { color: var(--brand-hover) !important; }
+.row-action:hover {
+  border-color: #a9d0de !important;
+  background: var(--brand-tint) !important;
+  color: var(--brand) !important;
+}
+
+/* Informational states use blue; semantic success/warning/error colors remain distinct */
+.notice-strip {
+  background: var(--brand-tint) !important;
+  border-color: var(--brand-line) !important;
+  color: #496d7a !important;
+}
+.notice-strip strong, .notice-icon { color: var(--brand) !important; }
+.notice-icon { border-color: #9fcbd9 !important; }
+.badge-blue { background: var(--brand-soft) !important; color: var(--brand) !important; }

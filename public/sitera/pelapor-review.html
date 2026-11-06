@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#086288">
+  <meta name="description" content="Pratinjau UI/UX halaman Pelapor SITERA berdasarkan SRS v0.12.">
+  <title>Area Pelapor — SITERA</title>
+  <link rel="icon" type="image/webp" href="/sitera/sitera-logo.webp">
+  <link rel="stylesheet" href="/sitera/theme.css">
+  <link rel="stylesheet" href="/sitera/pelapor-review.css">
+</head>
+<body>
+  <div class="prototype-ribbon"><span class="live-dot"></span> PRATINJAU UI/UX <span class="ribbon-divider">•</span> DATA SIMULASI</div>
+  <header class="app-header">
+    <a class="brand" href="/sitera/pelapor-review.html" aria-label="SITERA beranda">
+      <span class="brand-logo"><img src="/sitera/sitera-logo.webp" alt="Logo Irigasi Pertanian"></span>
+      <span class="brand-copy"><strong>SITERA</strong><small>Sistem Informasi Rekapitulasi & Pemantauan Kegiatan Irigasi Pertanian</small></span>
+    </a>
+    <div class="header-right">
+      <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <span class="internal-tag"><span></span> Sistem internal</span>
+      <button class="icon-button" type="button" aria-label="Notifikasi" id="notification-button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <i></i>
+      </button>
+      <div class="profile">
+        <span class="avatar">PD</span>
+        <span class="profile-copy"><strong>Pelapor Daerah</strong><small>Kabupaten Demo</small></span>
+        <span class="chevron">⌄</span>
+      </div>
+      <a class="exit-link" href="/">Keluar demo</a>
+    </div>
+  </header>
+
+  <nav class="main-nav" id="main-nav" aria-label="Navigasi Pelapor">
+    <button class="nav-item active" data-view="dashboard"><span class="nav-icon">⌂</span>Ringkasan</button>
+    <button class="nav-item" data-view="reports"><span class="nav-icon">▤</span>Laporan Saya</button>
+    <button class="nav-item" data-view="cpcl"><span class="nav-icon">⌕</span>Pilih CPCL</button>
+    <button class="nav-item" data-view="all"><span class="nav-icon">▦</span>Semua Laporan</button>
+  </nav>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+
+  <main class="workspace">
+    <div class="page-heading">
+      <div>
+        <div class="breadcrumb"><span>Ruang Pelapor</span><span>/</span><strong id="breadcrumb-current">Ringkasan</strong></div>
+        <h1 id="page-title">Ringkasan laporan</h1>
+        <p id="page-description">Pantau status laporan kegiatan irigasi kabupaten Anda.</p>
+      </div>
+      <div class="heading-actions">
+        <span class="period-chip"><span></span> Periode data · 2026</span>
+        <button class="btn btn-primary" data-action="go-cpcl"><span class="plus">＋</span> Buat Laporan</button>
+      </div>
+    </div>
+
+    <div class="notice">
+      <span class="notice-icon">i</span>
+      <span><strong>Mode pratinjau.</strong> Semua nama, angka, dan dokumen pada halaman ini adalah data simulasi untuk evaluasi UI/UX, bukan data operasional Kementan.</span>
+    </div>
+
+    <section id="view-dashboard" class="view active" aria-labelledby="page-title">
+      <div class="metrics-grid" id="dashboard-metrics"></div>
+      <div class="content-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <div><h2>Aktivitas laporan</h2><p>Perubahan status laporan terbaru</p></div>
+            <button class="text-action" data-action="go-reports">Lihat semua <span>→</span></button>
+          </div>
+          <div class="activity-list" id="activity-list"></div>
+        </section>
+        <section class="panel info-panel">
+          <div class="panel-heading"><div><h2>Ringkasan kelengkapan</h2><p>Kelompok dokumen pada laporan Anda</p></div></div>
+          <div class="completion-item"><div class="completion-top"><span>BAST</span><strong id="complete-bast">—</strong></div><div class="progress-track"><span id="bar-bast"></span></div></div>
+          <div class="completion-item"><div class="completion-top"><span>LPJ</span><strong id="complete-lpj">—</strong></div><div class="progress-track"><span id="bar-lpj"></span></div></div>
+          <div class="completion-item"><div class="completion-top"><span>Dokumentasi</span><strong id="complete-doc">—</strong></div><div class="progress-track"><span id="bar-doc"></span></div></div>
+          <div class="helper-note"><span>ⓘ</span> Kelengkapan berkas tidak otomatis berarti laporan sudah dinyatakan Sesuai oleh Verifikator.</div>
+        </section>
+      </div>
+      <section class="panel table-panel">
+        <div class="panel-heading">
+          <div><h2>Laporan terbaru</h2><p>Empat laporan terakhir pada akun kabupaten ini</p></div>
+          <button class="text-action" data-action="go-reports">Buka Laporan Saya <span>→</span></button>
+        </div>
+        <div id="dashboard-table"></div>
+      </section>
+    </section>
+
+    <section id="view-reports" class="view" aria-labelledby="page-title" hidden>
+      <section class="panel table-panel">
+        <div class="toolbar">
+          <label class="search-control"><span>⌕</span><input id="report-search" type="search" placeholder="Cari ID, kelompok tani, atau Nama DI"></label>
+          <select class="filter-control" id="report-province" aria-label="Filter provinsi"><option value="">Semua provinsi</option><option>Provinsi Ilustrasi</option></select>
+          <select class="filter-control" id="report-group" aria-label="Filter kelompok tani"><option value="">Semua kelompok tani</option><option>P3A Tirta Contoh</option><option>Poktan Sumber Demo</option><option>P3A Karya Ilustrasi</option><option>Poktan Tani Makmur</option></select>
+          <select class="filter-control" id="report-di" aria-label="Filter nama DI"><option value="">Semua Nama DI</option><option>DI Contoh Barat</option><option>DI Sumber Demo</option><option>DI Karya Ilustrasi</option><option>DI Makmur Demo</option></select>
+          <select class="filter-control" id="report-district" aria-label="Filter kecamatan"><option value="">Semua kecamatan</option><option>Kecamatan Utara</option><option>Kecamatan Timur</option><option>Kecamatan Selatan</option></select>
+          <select class="filter-control" id="report-village" aria-label="Filter desa"><option value="">Semua desa/kelurahan</option><option>Desa Contoh</option><option>Desa Sumber</option><option>Desa Karya</option><option>Desa Makmur</option></select>
+          <select class="filter-control" id="status-filter" aria-label="Filter status"><option value="">Semua status</option><option value="Draf">Draf</option><option value="Menunggu pemeriksaan">Menunggu pemeriksaan</option><option value="Tidak sesuai">Tidak sesuai</option><option value="Sesuai">Sesuai</option></select>
+          <label class="date-filter"><span>Dari</span><input class="filter-control" id="report-date-from" type="date" aria-label="Tanggal kirim dari"></label>
+          <label class="date-filter"><span>Sampai</span><input class="filter-control" id="report-date-to" type="date" aria-label="Tanggal kirim sampai"></label>
+          <select class="filter-control" id="report-sort" aria-label="Urutkan laporan"><option value="date-desc">Pembaruan terbaru</option><option value="date-asc">Pembaruan terlama</option><option value="group-asc">Kelompok A–Z</option><option value="group-desc">Kelompok Z–A</option><option value="di-asc">Nama DI A–Z</option><option value="di-desc">Nama DI Z–A</option></select>
+          <button class="btn btn-outline btn-sm" data-action="reset-filters">Reset</button>
+        </div>
+        <div id="reports-table"></div>
+      </section>
+    </section>
+
+    <section id="view-cpcl" class="view" aria-labelledby="page-title" hidden>
+      <div class="cpcl-intro panel">
+        <div class="cpcl-intro-icon">⌕</div>
+        <div><h2>Pilih data CPCL</h2><p>Pilih kelompok tani yang akan menjadi dasar paket laporan. Data yang tampil mengikuti cakupan kabupaten akun Anda.</p></div>
+      </div>
+      <section class="panel table-panel">
+        <div class="toolbar">
+          <label class="search-control"><span>⌕</span><input id="cpcl-search" type="search" placeholder="Cari nama kelompok tani atau Daerah Irigasi"></label>
+          <select class="filter-control" id="cpcl-province" aria-label="Filter provinsi"><option value="">Semua provinsi</option><option>Provinsi Ilustrasi</option></select>
+          <select class="filter-control" id="cpcl-regency" aria-label="Filter kabupaten"><option value="">Semua kabupaten/kota</option><option>Kabupaten Demo</option></select>
+          <select class="filter-control" id="cpcl-district" aria-label="Filter kecamatan"><option value="">Semua kecamatan</option><option>Kecamatan Utara</option><option>Kecamatan Timur</option><option>Kecamatan Selatan</option></select>
+          <button class="btn btn-outline btn-sm" data-action="reset-cpcl">Reset</button>
+        </div>
+        <div id="cpcl-table"></div>
+      </section>
+      <section class="panel cpcl-detail-panel" id="cpcl-detail-panel" hidden>
+        <div class="panel-heading">
+          <div><span class="section-kicker">DETAIL REFERENSI</span><h2 id="cpcl-detail-title">Detail CPCL</h2><p>Seluruh 14 kolom data sumber. Nilai simulasi ditandai secara jelas.</p></div>
+          <button class="btn btn-outline btn-sm" type="button" data-action="close-cpcl-detail">Tutup</button>
+        </div>
+        <div class="cpcl-detail-grid" id="cpcl-detail-fields"></div>
+        <div class="form-actions"><button class="btn btn-primary" type="button" data-action="choose-cpcl-from-detail" id="cpcl-detail-choose">Pilih CPCL</button></div>
+      </section>
+      <p class="page-footnote">Catatan: contoh identitas CPCL ditampilkan untuk evaluasi tampilan. ID resmi kelompok tani dan aturan satu kelompok terhadap beberapa baris CPCL masih menunggu konfirmasi.</p>
+    </section>
+
+    <section id="view-all" class="view" aria-labelledby="page-title" hidden>
+      <div class="summary-access-note"><span>ⓘ</span><div><strong>Ringkasan lintas kabupaten</strong><p>Sesuai batas hak akses Pelapor, halaman ini hanya menampilkan informasi ringkas. Dokumen, catatan pemeriksaan, identitas PIC, dan detail internal kabupaten lain tidak tersedia.</p></div></div>
+      <section class="panel table-panel">
+        <div class="toolbar">
+          <label class="search-control"><span>⌕</span><input id="all-search" type="search" placeholder="Cari ID, kelompok tani, atau Nama DI"></label>
+          <select class="filter-control" id="all-province" aria-label="Filter provinsi"><option value="">Semua provinsi</option><option>Provinsi Ilustrasi A</option><option>Provinsi Ilustrasi B</option><option>Provinsi Ilustrasi C</option></select>
+          <select class="filter-control" id="all-regency" aria-label="Filter kabupaten"><option value="">Semua kabupaten/kota</option><option>Kabupaten Contoh Utara</option><option>Kabupaten Contoh Barat</option><option>Kabupaten Contoh Timur</option></select>
+          <select class="filter-control" id="all-status"><option value="">Semua status</option><option>Menunggu pemeriksaan</option><option>Tidak sesuai</option><option>Sesuai</option></select>
+          <label class="date-filter"><span>Dari</span><input class="filter-control" id="all-date-from" type="date" aria-label="Tanggal kirim dari"></label>
+          <label class="date-filter"><span>Sampai</span><input class="filter-control" id="all-date-to" type="date" aria-label="Tanggal kirim sampai"></label>
+          <select class="filter-control" id="all-sort" aria-label="Urutkan laporan"><option value="date-desc">Pembaruan terbaru</option><option value="date-asc">Pembaruan terlama</option><option value="kab-asc">Kabupaten A–Z</option><option value="kab-desc">Kabupaten Z–A</option><option value="group-asc">Kelompok A–Z</option><option value="group-desc">Kelompok Z–A</option><option value="di-asc">Nama DI A–Z</option><option value="di-desc">Nama DI Z–A</option></select>
+          <button class="btn btn-outline btn-sm" data-action="reset-all-filters">Reset</button>
+        </div>
+        <div id="all-table"></div>
+      </section>
+    </section>
+
+    <section id="view-form" class="view" aria-labelledby="page-title" hidden>
+      <div class="form-progress panel">
+        <div class="step active"><span>1</span><div><strong>Data CPCL</strong><small>Identitas kelompok</small></div></div>
+        <div class="step-line"></div>
+        <div class="step active"><span>2</span><div><strong>Dokumen laporan</strong><small>Unggah tiga bagian</small></div></div>
+        <div class="step-line"></div>
+        <div class="step"><span>3</span><div><strong>Tinjau & kirim</strong><small>Validasi akhir</small></div></div>
+      </div>
+      <div class="form-layout">
+        <div class="form-main">
+          <section class="panel form-panel">
+            <div class="panel-heading"><div><span class="section-kicker">IDENTITAS LAPORAN</span><h2 id="form-heading">Dokumen pelaporan</h2><p>Pastikan dokumen sesuai dengan data CPCL yang dipilih.</p></div><span class="draft-pill" id="form-state">Draf baru</span></div>
+            <div class="selected-cpcl" id="selected-cpcl"></div>
+            <div class="document-section-heading"><div><h3>Dokumen pendukung</h3><p>Ketiga bagian wajib tersedia sebelum pengiriman.</p></div><span class="required-label">* Wajib</span></div>
+            <div class="upload-card">
+              <div class="upload-card-top"><span class="document-mark pdf">PDF</span><div><strong>BAST</strong><small>Berita Acara Serah Terima</small></div><span class="required-label">* Wajib</span></div>
+              <label class="dropzone" for="file-bast"><span class="upload-symbol">↑</span><strong id="name-bast">Pilih dokumen BAST</strong><small id="hint-bast">Format PDF · Batas ukuran/jumlah mengikuti keputusan final klien</small><input id="file-bast" type="file" accept=".pdf,application/pdf"></label>
+            </div>
+            <div class="upload-card">
+              <div class="upload-card-top"><span class="document-mark pdf">PDF</span><div><strong>LPJ</strong><small>Laporan Pertanggungjawaban / kuitansi belanja</small></div><span class="required-label">* Wajib</span></div>
+              <label class="dropzone" for="file-lpj"><span class="upload-symbol">↑</span><strong id="name-lpj">Pilih dokumen LPJ</strong><small id="hint-lpj">Format PDF · Batas ukuran/jumlah mengikuti keputusan final klien</small><input id="file-lpj" type="file" accept=".pdf,application/pdf"></label>
+            </div>
+            <div class="upload-card">
+              <div class="upload-card-top"><span class="document-mark ppt">PPTX</span><div><strong>Dokumentasi</strong><small>Dokumentasi foto kegiatan dalam presentasi</small></div><span class="required-label">* Wajib</span></div>
+              <label class="dropzone" for="file-doc"><span class="upload-symbol">↑</span><strong id="name-doc">Pilih dokumentasi kegiatan</strong><small id="hint-doc">Format PPTX · Maksimal 25.000.000 byte per berkas</small><input id="file-doc" type="file" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"></label>
+            </div>
+            <div class="form-error" id="form-error" role="alert" hidden></div>
+            <div class="form-actions"><button class="btn btn-outline" data-action="cancel-form">Kembali</button><button class="btn btn-secondary" data-action="save-draft">Simpan Draf</button><button class="btn btn-primary" data-action="submit-report">Tinjau & Kirim <span>→</span></button></div>
+          </section>
+        </div>
+        <aside class="form-aside">
+          <section class="panel aside-panel"><h3>Checklist dokumen</h3><p>Pastikan setiap dokumen sesuai kategori.</p><div class="check-row" id="check-bast"><span>○</span>BAST (PDF)</div><div class="check-row" id="check-lpj"><span>○</span>LPJ (PDF)</div><div class="check-row" id="check-doc"><span>○</span>Dokumentasi (PPTX)</div><div class="aside-tip">File akan diperiksa jenis dan ukurannya pada saat diunggah. Pemeriksaan kesesuaian dilakukan oleh Verifikator setelah laporan dikirim.</div></section>
+          <section class="panel aside-panel"><h3>Alur berikutnya</h3><div class="mini-step"><span>1</span><div><strong>Kirim laporan</strong><small>Laporan masuk antrean pemeriksaan.</small></div></div><div class="mini-step"><span>2</span><div><strong>Pemeriksaan pusat</strong><small>Verifikator memeriksa BAST, LPJ dan dokumentasi.</small></div></div><div class="mini-step"><span>3</span><div><strong>Hasil pemeriksaan</strong><small>Sesuai atau Tidak sesuai disertai catatan bila perlu perbaikan.</small></div></div></section>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-detail" class="view" aria-labelledby="page-title" hidden>
+      <div class="detail-toolbar"><button class="back-link" data-action="back-to-reports">← Kembali ke Laporan Saya</button><span id="detail-status"></span></div>
+      <div class="detail-layout">
+        <div class="detail-main">
+          <section class="panel detail-panel"><div class="panel-heading"><div><span class="section-kicker">IDENTITAS LAPORAN</span><h2 id="detail-title">Detail laporan</h2><p id="detail-subtitle"></p></div></div><div class="detail-fields" id="detail-fields"></div></section>
+          <section class="panel detail-panel"><div class="panel-heading"><div><h2>Dokumen laporan</h2><p>Dokumen pada versi yang sedang ditampilkan.</p></div><span class="version-chip" id="detail-version"></span></div><div id="detail-documents"></div></section>
+          <section class="panel detail-panel"><div class="panel-heading"><div><h2>Riwayat aktivitas</h2><p>Jejak status laporan.</p></div></div><div class="timeline" id="detail-timeline"></div></section>
+        </div>
+        <aside class="detail-side">
+          <section class="panel aside-panel"><h3>Status laporan</h3><div id="detail-status-card"></div><div id="detail-feedback"></div><div id="detail-action"></div></section>
+          <section class="panel aside-panel"><h3>Riwayat versi</h3><div id="detail-version-history"></div><p class="aside-tip">Pada revisi, ID paket laporan tetap dan versi dokumen bertambah. Dokumen versi sebelumnya tetap menjadi riwayat.</p></section>
+        </aside>
+      </div>
+    </section>
+
+    <footer class="app-footer"><span>© 2026 SITERA · Kementerian Pertanian Pasar Minggu</span><span>Pratinjau berdasarkan baseline SRS v0.12 · Belum untuk produksi</span></footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/sitera/pelapor-review.js"></script>
+<script src="/sitera/sidebar.js"></script>
+</body>
+</html>
