@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\CpclImportBatch;
+use App\Models\CpclRecord;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -63,6 +64,62 @@ class CpclImportTest extends TestCase
         $batch = CpclImportBatch::query()->latest()->firstOrFail();
         $this->post('/admin/cpcl/import/'.$batch->id.'/confirm')->assertRedirect('/admin-only');
         $this->assertDatabaseHas('cpcl_records', ['nama_di' => 'DI XLSX', 'kel_tani' => 'P3A XLSX']);
+    }
+
+    public function test_preview_classifies_existing_duplicate_conflict_repeated_and_invalid_rows(): void
+    {
+        $admin = $this->userWithRole('super_admin');
+        CpclRecord::create([
+            'no' => 'CPCL-1',
+            'nama_di' => 'DI Existing',
+            'kewenangan' => 'Kabupaten/Kota',
+            'keterangan' => 'Referensi',
+            'provinsi' => 'Jawa Barat',
+            'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan',
+            'desa' => 'Mulyasari',
+            'kel_tani' => 'P3A Existing',
+            'nama_ketua' => 'Sutrisno',
+            'realisasi' => '1',
+            'luas_ha' => 25.0,
+            'x' => 107.1234,
+            'y' => -6.1234,
+        ]);
+        CpclRecord::create([
+            'no' => 'CPCL-2',
+            'nama_di' => 'DI Conflict Original',
+            'provinsi' => 'Jawa Barat',
+            'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan',
+            'desa' => 'Sukamandi',
+            'kel_tani' => 'P3A Conflict',
+        ]);
+        $csv = "No.,Nama DI,Kewenangan,Keterangan,Provinsi,Kab_Kota,Kecamatan,Desa/Kelurahan,Kel_Tani,Nama Ketua,Realisasi,Luas_ha,X,Y\n"
+            ."CPCL-1,DI Existing,Kabupaten/Kota,Referensi,Jawa Barat,Subang,Pamanukan,Mulyasari,P3A Existing,Sutrisno,1,25.0,107.1234,-6.1234\n"
+            ."CPCL-2,DI Changed,Kabupaten/Kota,Referensi,Jawa Barat,Subang,Pamanukan,Sukamandi,P3A Conflict,Sutrisno,1,25.0,107.1234,-6.1234\n"
+            ."CPCL-3,DI New,Kabupaten/Kota,Referensi,Jawa Barat,Subang,Pamanukan,Legonkulon,P3A New,Siti,2,10.0,107.1,-6.1\n"
+            ."CPCL-3,DI New,Kabupaten/Kota,Referensi,Jawa Barat,Subang,Pamanukan,Legonkulon,P3A New,Siti,2,10.0,107.1,-6.1\n"
+            ."CPCL-4,DI Conflict First,Kabupaten/Kota,Referensi,Jawa Barat,Subang,Pamanukan,Desa Konflik,P3A Conflict In File,Siti,2,10.0,107.1,-6.1\n"
+            ."CPCL-4,DI Conflict Second,Kabupaten/Kota,Referensi,Jawa Barat,Subang,Pamanukan,Desa Konflik,P3A Conflict In File,Siti,2,10.0,107.1,-6.1\n"
+            ."5,,,,,,,,,,,,,\n";
+        $file = UploadedFile::fake()->createWithContent('cpcl-matrix.csv', $csv);
+
+        $this->actingAs($admin)->post('/admin/cpcl/import/preview', ['file' => $file])->assertOk();
+
+        $batch = CpclImportBatch::query()->firstOrFail();
+        $this->assertSame([
+            'Baru valid' => 1,
+            'Duplikat' => 2,
+            'Konflik' => 3,
+            'Tidak valid' => 1,
+        ], $batch->summary);
+        $this->assertSame(['Duplikat', 'Konflik', 'Baru valid', 'Duplikat', 'Konflik', 'Konflik', 'Tidak valid'], array_column($batch->rows, '_status'));
+
+        $this->post('/admin/cpcl/import/'.$batch->id.'/confirm')->assertRedirect('/admin-only');
+        $this->assertDatabaseCount('cpcl_records', 3);
+        $this->assertDatabaseHas('cpcl_records', ['nama_di' => 'DI Existing', 'kel_tani' => 'P3A Existing']);
+        $this->assertDatabaseHas('cpcl_records', ['nama_di' => 'DI New', 'kel_tani' => 'P3A New']);
+        $this->assertDatabaseHas('cpcl_records', ['nama_di' => 'DI Conflict Original', 'kel_tani' => 'P3A Conflict']);
     }
 
     private function userWithRole(string $code): User

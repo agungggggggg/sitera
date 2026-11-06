@@ -16,13 +16,18 @@ class ReporterReportController extends Controller
         $filters = $this->filters($request);
         $query = $user->reports()->getQuery()->with(['cpclRecord', 'verification']);
         $this->applyFilters($query, $filters);
+        $cpclOptions = CpclRecord::query()
+            ->select(['kel_tani', 'nama_di'])
+            ->whereHas('reports', fn (Builder $reports) => $reports->where('user_id', $user->id))
+            ->distinct()
+            ->get();
 
         return view('reports.index', [
             'reports' => $query->paginate(20)->withQueryString(),
             'filters' => $filters,
             'provinces' => $user->provinsi ? [$user->provinsi] : [],
-            'groups' => $user->reports()->whereHas('cpclRecord')->with('cpclRecord')->get()->pluck('cpclRecord.kel_tani')->filter()->unique()->sort()->values(),
-            'irrigations' => $user->reports()->whereHas('cpclRecord')->with('cpclRecord')->get()->pluck('cpclRecord.nama_di')->filter()->unique()->sort()->values(),
+            'groups' => $cpclOptions->pluck('kel_tani')->filter()->unique()->sort()->values(),
+            'irrigations' => $cpclOptions->pluck('nama_di')->filter()->unique()->sort()->values(),
             'districts' => $user->reports()->distinct()->whereNotNull('kecamatan')->orderBy('kecamatan')->pluck('kecamatan'),
             'villages' => $user->reports()->when($filters['kecamatan'] !== '', fn ($q) => $q->where('kecamatan', $filters['kecamatan']))->distinct()->whereNotNull('desa')->orderBy('desa')->pluck('desa'),
         ]);

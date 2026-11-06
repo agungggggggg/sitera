@@ -31,9 +31,10 @@ class ExecutiveController extends Controller
 
     private function viewData(Request $request): array
     {
-        $filters = app(ExecutiveReportFilters::class)->filters($request);
+        $reportFilters = app(ExecutiveReportFilters::class);
+        $filters = $reportFilters->filters($request);
         $query = Report::query()->with(['user', 'cpclRecord', 'verification', 'attachments']);
-        app(ExecutiveReportFilters::class)->applyFilters($query, $filters);
+        $reportFilters->applyFilters($query, $filters);
         $total = (clone $query)->count();
         $drafts = (clone $query)->where('status', 'DRAF')->count();
         $pending = (clone $query)->where('status', 'TERKIRIM')->whereDoesntHave('verification')->count();
@@ -54,7 +55,7 @@ class ExecutiveController extends Controller
             ->count();
 
         $reportSort = (clone $query);
-        app(ExecutiveReportFilters::class)->applySort($reportSort, $filters['sort']);
+        $reportFilters->applySort($reportSort, $filters['sort']);
         $reports = $reportSort->paginate(15)->withQueryString();
         $latest = (clone $query)->latest('updated_at')->limit(8)->get();
         $oldestQueue = (clone $query)->where('status', 'TERKIRIM')->whereDoesntHave('verification')->oldest('dikirim_pada')->limit(5)->get();

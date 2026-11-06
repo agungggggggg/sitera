@@ -71,7 +71,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .metric.amber .metric-icon{background:var(--amber-soft);color:var(--amber)}
 .metric.red .metric-icon{background:var(--red-soft);color:var(--red)}
  .metric.green .metric-icon{background:var(--green-soft);color:var(--green)}
-.metric.green .metric-icon{background:var(--green-soft);color:var(--green)}
 .content-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(290px,.8fr);gap:15px;margin-bottom:16px}
 .panel{min-width:0;border:1px solid var(--line);border-radius:11px;background:#fff;box-shadow:0 2px 7px #0a476006;overflow:hidden}
 .panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:13px;padding:17px 19px 14px}

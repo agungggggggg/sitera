@@ -23,7 +23,6 @@
   .app>.sidebar#main-nav .brand{justify-content:flex-start;padding:2px 8px 22px}
   .app>.sidebar#main-nav .brand>div:last-child,.app>.sidebar#main-nav .nav-label,.app>.sidebar#main-nav .nav a span:not(.ico),.app>.sidebar#main-nav .profile>div:last-child{display:block}
   .app>.sidebar#main-nav .nav a{min-height:48px;justify-content:flex-start;padding:11px 12px;border-radius:10px;color:#d3e3e5;text-decoration:none}
-  .app>.sidebar#main-nav .nav a:hover,.app>.sidebar#main-nav .nav a.active{background:rgba(255,255,255,.12);color:#fff}
   .app>.sidebar#main-nav .sidebar-foot{padding:16px 10px 0}
   .app>.main{margin-left:0!important;min-width:0;width:100%}
   .app>.main>.topbar{height:68px;min-height:68px;padding:0 12px;gap:10px;z-index:20}

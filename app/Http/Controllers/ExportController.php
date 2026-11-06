@@ -26,8 +26,8 @@ class ExportController extends Controller
         $format = $request->input('format');
         abort_unless(in_array($format, ['csv', 'xlsx', 'pdf'], true), 422);
 
-        $query = Report::query()->with('user')->where('status', 'TERKIRIM');
         $role = $request->user()->role?->code;
+        $query = Report::query()->with('user')->where('status', 'TERKIRIM');
 
         if ($role === 'pelapor_daerah') {
             $query->where('user_id', $request->user()->id);

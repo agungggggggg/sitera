@@ -55,6 +55,51 @@ class ReporterExperienceUiTest extends TestCase
             ->assertSee('Filter');
     }
 
+    public function test_report_list_filter_options_remain_distinct_sorted_and_owner_scoped(): void
+    {
+        $reporter = $this->reporter();
+        $firstCpcl = CpclRecord::create([
+            'nama_di' => 'DI Zeta', 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan', 'desa' => 'Mulyasari', 'kel_tani' => 'Kelompok Zeta',
+        ]);
+        $secondCpcl = CpclRecord::create([
+            'nama_di' => 'DI Alpha', 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan', 'desa' => 'Sukamandi', 'kel_tani' => 'Kelompok Alpha',
+        ]);
+        $otherReporter = $this->reporter(['email' => 'options-other@example.test']);
+        $otherCpcl = CpclRecord::create([
+            'nama_di' => 'DI Private', 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan', 'desa' => 'Legonkulon', 'kel_tani' => 'Kelompok Private',
+        ]);
+        $blankCpcl = CpclRecord::create([
+            'nama_di' => '', 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan', 'desa' => 'Blank', 'kel_tani' => '',
+        ]);
+        $this->report($reporter, $firstCpcl, 'LP-20261103-0021', 'DRAF');
+        $this->report($reporter, $secondCpcl, 'LP-20261103-0022', 'TERKIRIM');
+        $this->report($reporter, $firstCpcl, 'LP-20261103-0025', 'DRAF');
+        $this->report($reporter, $blankCpcl, 'LP-20261103-0026', 'DRAF');
+        Report::create([
+            'user_id' => $reporter->id, 'nomor_tiket' => 'LP-20261103-0027', 'status' => 'DRAF',
+            'tanggal_kejadian' => '2026-11-03', 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Subang',
+            'jenis_kerusakan' => 'Saluran Sekunder', 'deskripsi' => 'Laporan manual tanpa CPCL.', 'sumber_isian' => 'MANUAL',
+        ]);
+        $this->report($otherReporter, $otherCpcl, 'LP-20261103-0024', 'DRAF');
+
+        $response = $this->actingAs($reporter)->get(route('reports.index'));
+        $response->assertOk()
+            ->assertViewHas('groups', fn ($groups) => $groups->all() === ['Kelompok Alpha', 'Kelompok Zeta'])
+            ->assertViewHas('irrigations', fn ($irrigations) => $irrigations->all() === ['DI Alpha', 'DI Zeta'])
+            ->assertViewHas('reports', fn ($reports) => $reports->total() === 5 && $reports->count() === 5);
+
+        $this->actingAs($reporter)->get(route('reports.index', ['q' => 'LP-20261103-0022', 'sort' => 'date-asc', 'page' => 1]))
+            ->assertOk()
+            ->assertViewHas('filters', fn ($filters) => $filters['q'] === 'LP-20261103-0022' && $filters['sort'] === 'date-asc')
+            ->assertViewHas('reports', fn ($reports) => $reports->total() === 1 && $reports->first()->nomor_tiket === 'LP-20261103-0022')
+            ->assertViewHas('groups', fn ($groups) => $groups->all() === ['Kelompok Alpha', 'Kelompok Zeta'])
+            ->assertViewHas('irrigations', fn ($irrigations) => $irrigations->all() === ['DI Alpha', 'DI Zeta']);
+    }
+
     public function test_all_reports_screen_is_a_read_only_summary_without_detail_links(): void
     {
         $reporter = $this->reporter();
