@@ -1,0 +1,92 @@
+/* SITERA — bounded, fluid layout. All content remains in normal flow. */
+:root {
+  --blue: #3d75aa;
+  --ink: #474747;
+  --page-width: 1200px;
+}
+.LOGI-nin {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 5vh, 56px);
+  padding: clamp(24px, 4vh, 44px) clamp(20px, 5vw, 72px);
+  background: #8fb7ca;
+  font-family: 'Inclusive Sans', Arial, Helvetica, sans-serif;
+}
+.BG { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.kementan { width: 100%; height: 100%; object-fit: cover; object-position: center; filter: blur(2px); transform: scale(1.015); }
+.rectangle { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(181,181,181,.76) 0%, rgba(155,187,201,.71) 45%, rgba(49,176,255,.71) 100%); }
+.brand {
+  width: 100%; max-width: var(--page-width); margin-inline: auto;
+  display: grid; grid-template-columns: 54px minmax(0, 1fr);
+  column-gap: 10px; align-items: center;
+}
+.image { grid-row: 1 / 3; width: 54px; height: 60px; }
+.text-wrapper-10 { color: var(--blue); font-size: 28px; font-weight: 500; letter-spacing: 3.5px; align-self: end; }
+.text-wrapper-11 { color: white; font-size: 12px; font-weight: 600; line-height: 1.5; letter-spacing: 2px; align-self: start; }
+.login-layout {
+  flex: 1; width: 100%; max-width: var(--page-width); margin-inline: auto;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 5vw, 80px); align-items: center;
+  padding-bottom: clamp(12px, 6vh, 64px);
+}
+.text-kiri { min-width: 0; }
+.text-wrapper-12 { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; color: var(--blue); font-size: 11px; font-weight: 600; letter-spacing: .7px; line-height: 1.5; }
+.text-wrapper-12::before { content: ''; width: 36px; height: 3px; flex-shrink: 0; background: var(--blue); border-radius: 4px; }
+.text-wrapper-14, .text-wrapper-15 { font-size: clamp(32px, 3.7vw, 50px); font-weight: 700; line-height: 1.18; letter-spacing: 1px; overflow-wrap: break-word; }
+.text-wrapper-14 { color: white; }
+.text-wrapper-15 { color: #366ea2; margin-top: 10px; }
+.text-wrapper-13 { max-width: 460px; margin-top: 24px; color: white; font-size: 13px; line-height: 1.65; letter-spacing: .4px; }
+.kotak-in-login { min-width: 0; width: 100%; max-width: 600px; min-height: clamp(500px, 62vh, 570px); justify-self: end; background: #fcfcfc; border-radius: 17px; padding: clamp(28px, 3.5vw, 42px); box-shadow: 0 12px 40px #20466a0a; }
+#login-form { display: flex; flex-direction: column; min-width: 0; }
+.text-wrapper-2 { margin-bottom: 16px; color: var(--blue); font-size: 11px; font-weight: 500; letter-spacing: 2.5px; line-height: 1.5; }
+.text-wrapper { font-size: clamp(24px, 2.3vw, 30px); font-weight: 600; line-height: 1.25; letter-spacing: .6px; color: #080808; }
+.p { margin-top: 4px; margin-bottom: 26px; color: var(--ink); font-size: 13px; line-height: 1.6; }
+.text-wrapper-3, .text-wrapper-4 { margin-bottom: 8px; font-size: 14px; color: var(--ink); line-height: 1.4; }
+.text-wrapper-4 { margin-top: 18px; }
+.input-wrap { position: relative; min-width: 0; }
+.rectangle-2, .rectangle-3 { display: block; width: 100%; min-width: 0; height: 48px; border: 1px solid #cecece; border-radius: 4px; padding: 0 44px; background: #fcfcfc; color: var(--ink); font-size: 16px; outline: none; }
+.rectangle-2::placeholder, .rectangle-3::placeholder { color: #a5a5a5; font-size: 13px; opacity: 1; }
+.rectangle-2:focus, .rectangle-3:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #3d75aa26; }
+.person, .unlock { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; pointer-events: none; }
+.eye-toggle { position: absolute; right: 2px; top: 2px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.eye-toggle svg { width: 22px; height: 22px; color: #b7b7b7; }
+.form-options { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 14px; }
+.remember-option { display: flex; align-items: center; gap: 7px; min-height: 36px; }
+.remember-device { margin: 0; width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer; }
+.text-wrapper-8 { font-size: 11px; line-height: 1.5; color: #7e7e7e; cursor: pointer; }
+.text-wrapper-9 { min-height: 36px; border: 0; padding: 0; background: transparent; color: var(--blue); font-size: 11px; line-height: 1.5; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; text-decoration: none; }
+.rectangle-4 { width: 100%; min-height: 48px; margin-top: 16px; padding: 12px 20px; border: 0; border-radius: 4px; background: var(--blue); color: white; font-size: 15px; cursor: pointer; box-shadow: 0 1px 3px #00000026; }
+.rectangle-4:hover { background: #346995; }
+.form-message { margin-top: 14px; color: var(--ink); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.form-message:empty { display: none; }
+.form-message--error { margin-top: 14px; color: #a33128; background: #fff5f4; border: 1px solid #f0c7c2; border-radius: 6px; padding: 10px 14px; font-size: 12px; line-height: 1.5; }
+.form-message--success { margin-top: 14px; color: #12664e; background: #effaf5; border: 1px solid #bde3d4; border-radius: 6px; padding: 10px 14px; font-size: 12px; line-height: 1.5; }
+@media (max-width: 850px) {
+  .kotak-in-login { min-height: 0; max-width: none; }
+  .LOGI-nin { gap: 32px; }
+  .login-layout { grid-template-columns: minmax(0, 1fr); max-width: 540px; gap: 28px; padding-bottom: 8px; }
+  .brand { max-width: 540px; }
+  .text-wrapper-12 { margin-bottom: 16px; }
+  .text-wrapper-14, .text-wrapper-15 { font-size: clamp(30px, 5.5vw, 42px); }
+  .text-wrapper-13 { margin-top: 16px; }
+}
+@media (max-width: 420px) {
+  .LOGI-nin { padding: 22px 16px 28px; }
+  .kotak-in-login { padding: 24px 20px; }
+  .brand { grid-template-columns: 44px minmax(0, 1fr); gap: 0 8px; }
+  .image { width: 44px; height: 52px; }
+  .text-wrapper-10 { font-size: 24px; }
+  .text-wrapper-11 { font-size: 10px; letter-spacing: 1px; }
+}
+@media (min-width: 851px) and (max-height: 720px) {
+  .kotak-in-login { min-height: 0; padding: 28px 34px; }
+  .LOGI-nin { padding-top: 20px; padding-bottom: 20px; gap: 20px; }
+  .login-layout { padding-bottom: 0; }
+  .text-wrapper-14, .text-wrapper-15 { font-size: clamp(30px, 3.5vw, 42px); }
+  .text-wrapper-12 { margin-bottom: 16px; }
+  .text-wrapper-13 { margin-top: 16px; }
+}
