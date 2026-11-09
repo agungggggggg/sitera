@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reports;
 
+use App\Http\Controllers\Controller;
 use App\Models\CpclRecord;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

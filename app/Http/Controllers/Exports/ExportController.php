@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Exports;
 
+use App\Http\Controllers\Controller;
 use App\Models\Report;
 use App\Services\ExecutiveReportFilters;
 use App\Services\RegionCatalog;
+use App\Services\ReportCsvExporter;
 use App\Services\ReportPdfExporter;
 use App\Services\ReportXlsxExporter;
 use Illuminate\Contracts\View\View;
@@ -14,7 +16,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportController extends Controller
 {
-    public function download(Request $request, ReportXlsxExporter $xlsxExporter, ReportPdfExporter $pdfExporter, RegionCatalog $regions): Response|View
+    public function download(Request $request, ReportXlsxExporter $xlsxExporter, ReportPdfExporter $pdfExporter, ReportCsvExporter $csvExporter, RegionCatalog $regions): Response|View
     {
         $role = $request->user()->role?->code;
         abort_unless(in_array($role, ['pelapor_daerah', 'verifikator_pusat', 'pimpinan_kementan'], true), 403);
@@ -53,14 +55,15 @@ class ExportController extends Controller
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'Content-Disposition' => 'attachment; filename="sitera-rekap-'.now()->format('Ymd-His').'.xlsx"',
             ])
-            : $this->csvResponse($reports);
+            : $csvExporter->response($reports);
     }
 
-    public function csv(Request $request): StreamedResponse
+    public function csv(Request $request, ?ReportCsvExporter $csvExporter = null): StreamedResponse
     {
+        $exporter = $csvExporter ?? app(ReportCsvExporter::class);
         $reports = $this->queryFor($request)->latest('dikirim_pada')->get();
 
-        return $this->csvResponse($reports);
+        return $exporter->response($reports);
     }
 
     private function queryFor(Request $request)
@@ -79,28 +82,10 @@ class ExportController extends Controller
         return $query;
     }
 
-    private function csvResponse($reports): StreamedResponse
+    private function csvResponse($reports, ?ReportCsvExporter $csvExporter = null): StreamedResponse
     {
-        $filename = 'sitera-rekap-'.now()->format('Ymd-His').'.csv';
+        $exporter = $csvExporter ?? app(ReportCsvExporter::class);
 
-        return response()->streamDownload(function () use ($reports): void {
-            $handle = fopen('php://output', 'w');
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, ['Nomor Tiket', 'Status', 'Tanggal Kejadian', 'Pelapor', 'Provinsi', 'Kabupaten', 'Jenis Kerusakan', 'Deskripsi', 'Dikirim Pada']);
-            foreach ($reports as $report) {
-                fputcsv($handle, [
-                    $report->nomor_tiket,
-                    $report->status,
-                    $report->tanggal_kejadian?->format('Y-m-d'),
-                    $report->user?->name,
-                    $report->provinsi,
-                    $report->kabupaten,
-                    $report->jenis_kerusakan,
-                    $report->deskripsi,
-                    $report->dikirim_pada?->format('Y-m-d H:i:s'),
-                ]);
-            }
-            fclose($handle);
-        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return $exporter->response($reports);
     }
 }

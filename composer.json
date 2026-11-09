@@ -35,10 +35,10 @@
     },
     "scripts": {
         "setup": [
-            "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
+            "@php -r \"if (file_exists('.env')) { $k = ''; foreach (file('.env') as $l) { $t = trim($l); if (str_starts_with($t, 'APP_KEY') && str_contains($t, '=')) { $p = explode('=', $t, 2); if (trim($p[0]) === 'APP_KEY') { $k = trim(trim(trim($p[1]), chr(34)), chr(39)); } } } if ($k === '') { passthru('php artisan key:generate'); } }\""
+        ],
+        "build-assets": [
             "npm install --ignore-scripts",
             "npm run build"
         ],

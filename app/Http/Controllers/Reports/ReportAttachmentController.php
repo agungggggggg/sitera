@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reports;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Report;
 use Illuminate\Http\RedirectResponse;

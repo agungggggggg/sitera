@@ -35,6 +35,13 @@ class ReportCorrectionSubmitTest extends TestCase
             'id' => $original->id,
             'status' => 'TERKIRIM',
         ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'actor_id' => $owner->id,
+            'action' => 'report.submitted',
+            'result' => 'success',
+            'subject_type' => 'report',
+            'subject_id' => (string) $correction->id,
+        ]);
     }
 
     public function test_invalid_correction_cannot_be_submitted(): void
@@ -72,6 +79,10 @@ class ReportCorrectionSubmitTest extends TestCase
         $this->actingAs($owner)
             ->post('/laporan/'.$correction->id.'/koreksi/kirim')
             ->assertStatus(422);
+
+        $this->assertDatabaseCount('audit_logs', 1);
+        $verifier = User::whereHas('role', fn ($q) => $q->where('code', 'verifikator_pusat'))->first();
+        $this->assertSame(1, $verifier->notifications()->count());
     }
 
     private function submittedReport(User $user, string $ticket): Report

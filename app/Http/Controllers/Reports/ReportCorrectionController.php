@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reports;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Report;
 use App\Models\User;
-use App\Notifications\SiteraEventNotification;
+use App\Services\ReportSubmissionService;
+use App\Services\ReportTicketGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -12,31 +15,42 @@ use Illuminate\View\View;
 
 class ReportCorrectionController extends Controller
 {
-    public function create(Request $request, Report $report): RedirectResponse
+    public function create(Request $request, Report $report, ReportTicketGenerator $ticketGenerator): RedirectResponse
     {
         abort_unless($report->user_id === $request->user()->id, 404);
         abort_unless($report->verification?->hasil === 'TIDAK_SESUAI', 422);
 
-        $correction = Report::firstOrCreate(
-            ['koreksi_dari' => $report->id],
-            [
-                'user_id' => $request->user()->id,
-                'nomor_tiket' => $this->ticket($report),
-                'status' => 'DRAF',
-                'tanggal_kejadian' => $report->tanggal_kejadian,
-                'provinsi' => $report->provinsi,
-                'kabupaten' => $report->kabupaten,
-                'kecamatan' => $report->kecamatan,
-                'desa' => $report->desa,
-                'nama_saluran' => $report->nama_saluran,
-                'jenis_kerusakan' => $report->jenis_kerusakan,
-                'deskripsi' => $report->deskripsi,
-                'panjang_terdampak_m' => $report->panjang_terdampak_m,
-                'luas_terdampak_ha' => $report->luas_terdampak_ha,
-                'koordinat' => $report->koordinat,
-                'catatan' => 'Koreksi dari '.$report->nomor_tiket,
-                'sumber_isian' => 'MANUAL',
-            ],
+        $correction = $ticketGenerator->generate(
+            $report->tanggal_kejadian,
+            function (string $ticket) use ($request, $report): Report {
+                $existing = Report::query()
+                    ->where('koreksi_dari', $report->id)
+                    ->first();
+
+                if ($existing) {
+                    return $existing;
+                }
+
+                return Report::create([
+                    'user_id' => $request->user()->id,
+                    'koreksi_dari' => $report->id,
+                    'nomor_tiket' => $ticket,
+                    'status' => 'DRAF',
+                    'tanggal_kejadian' => $report->tanggal_kejadian,
+                    'provinsi' => $report->provinsi,
+                    'kabupaten' => $report->kabupaten,
+                    'kecamatan' => $report->kecamatan,
+                    'desa' => $report->desa,
+                    'nama_saluran' => $report->nama_saluran,
+                    'jenis_kerusakan' => $report->jenis_kerusakan,
+                    'deskripsi' => $report->deskripsi,
+                    'panjang_terdampak_m' => $report->panjang_terdampak_m,
+                    'luas_terdampak_ha' => $report->luas_terdampak_ha,
+                    'koordinat' => $report->koordinat,
+                    'catatan' => 'Koreksi dari '.$report->nomor_tiket,
+                    'sumber_isian' => 'MANUAL',
+                ]);
+            }
         );
 
         return redirect('/laporan/'.$correction->id.'/koreksi/edit');
@@ -46,10 +60,12 @@ class ReportCorrectionController extends Controller
     {
         abort_unless($report->user_id === $request->user()->id && $report->koreksi_dari && $report->status === 'DRAF', 404);
 
+        $report->load(['originalReport.verification', 'attachments']);
+
         return view('reports.correction-edit', ['report' => $report]);
     }
 
-    public function submit(Request $request, Report $report): RedirectResponse
+    public function submit(Request $request, Report $report, ReportSubmissionService $submissionService): RedirectResponse
     {
         abort_unless($report->user_id === $request->user()->id && $report->koreksi_dari, 404);
         abort_if($report->status !== 'DRAF', 422, 'Koreksi sudah terkirim.');
@@ -61,18 +77,8 @@ class ReportCorrectionController extends Controller
             'luas_terdampak_ha', 'koordinat', 'catatan',
         ]);
         $this->validateFields($request->merge($payload));
-        $report->forceFill(['status' => 'TERKIRIM', 'dikirim_pada' => now()])->save();
 
-        $verifiers = User::query()->whereHas('role', fn ($query) => $query->where('code', 'verifikator_pusat'))->get();
-        foreach ($verifiers as $verifier) {
-            $verifier->notify(new SiteraEventNotification(
-                'koreksi_dikirim',
-                'Koreksi laporan baru',
-                $report->nomor_tiket.' telah dikirim dan menunggu pemeriksaan.',
-                $report->id,
-                $report->nomor_tiket,
-            ));
-        }
+        $submissionService->submit($request->user(), $report);
 
         return redirect('/laporan')->with('status', 'Koreksi '.$report->nomor_tiket.' berhasil dikirim.');
     }
@@ -104,14 +110,6 @@ class ReportCorrectionController extends Controller
             'koordinat' => ['nullable', 'string', 'max:100'],
             'catatan' => ['nullable', 'string'],
         ]);
-    }
-
-    private function ticket(Report $report): string
-    {
-        $date = Carbon::parse($report->tanggal_kejadian)->format('Ymd');
-        $count = Report::where('nomor_tiket', 'like', 'LP-'.$date.'-%')->count() + 1;
-
-        return 'LP-'.$date.'-'.str_pad((string) $count, 4, '0', STR_PAD_LEFT);
     }
 }
 

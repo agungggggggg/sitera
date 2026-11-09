@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AuditLogger;

@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reports;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\CpclRecord;
 use App\Models\Report;
 use App\Models\ReportAttachment;
+use App\Services\ReportSubmissionService;
+use App\Services\ReportTicketGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -26,7 +30,7 @@ class ReportPackageController extends Controller
         return view('reports.package-form', ['cpcl' => $cpcl, 'report' => null]);
     }
 
-    public function store(Request $request, CpclRecord $cpcl): RedirectResponse
+    public function store(Request $request, CpclRecord $cpcl, ReportTicketGenerator $ticketGenerator, ReportSubmissionService $submissionService): RedirectResponse
     {
         $this->assertCpclRegion($request, $cpcl);
         $existing = Report::query()->where('user_id', $request->user()->id)->where('cpcl_id', $cpcl->id)->first();
@@ -36,16 +40,13 @@ class ReportPackageController extends Controller
 
         $action = $this->requestedAction($request);
         $files = $this->validatedFiles($request, $action === 'submit');
-        $report = DB::transaction(function () use ($request, $cpcl): Report {
-            $date = Carbon::now('Asia/Jakarta');
-            $prefix = 'LP-'.$date->format('Ymd').'-';
-            $last = Report::query()->where('nomor_tiket', 'like', $prefix.'%')->lockForUpdate()->orderByDesc('nomor_tiket')->value('nomor_tiket');
-            $sequence = $last ? ((int) substr($last, -4)) + 1 : 1;
-
-            return Report::create([
+        $date = Carbon::now('Asia/Jakarta');
+        $report = $ticketGenerator->generate(
+            $date,
+            fn (string $ticket): Report => Report::create([
                 'user_id' => $request->user()->id,
                 'cpcl_id' => $cpcl->id,
-                'nomor_tiket' => $prefix.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT),
+                'nomor_tiket' => $ticket,
                 'status' => 'DRAF',
                 'versi' => 1,
                 'tanggal_kejadian' => $date->toDateString(),
@@ -57,13 +58,15 @@ class ReportPackageController extends Controller
                 'jenis_kerusakan' => 'Paket CPCL',
                 'deskripsi' => 'Paket dokumen pelaporan CPCL '.$cpcl->kel_tani,
                 'sumber_isian' => 'MANUAL',
-            ]);
-        });
+            ])
+        );
 
         $this->storeAttachments($report, $files);
 
         if ($action === 'submit') {
-            return app(ReportController::class)->submit($request, $report->id);
+            $submissionService->submit($request->user(), $report);
+
+            return redirect('/laporan')->with('status', 'Laporan '.$report->nomor_tiket.' berhasil dikirim.');
         }
 
         return redirect('/laporan')->with('status', 'Draf paket '.$report->nomor_tiket.' berhasil disimpan.');
@@ -79,7 +82,7 @@ class ReportPackageController extends Controller
         ]);
     }
 
-    public function update(Request $request, Report $report): RedirectResponse
+    public function update(Request $request, Report $report, ReportSubmissionService $submissionService): RedirectResponse
     {
         $this->assertEditable($request, $report);
         $action = $this->requestedAction($request);
@@ -87,7 +90,9 @@ class ReportPackageController extends Controller
         $this->storeAttachments($report, $files);
 
         if ($action === 'submit') {
-            return app(ReportController::class)->submit($request, $report->id);
+            $submissionService->submit($request->user(), $report);
+
+            return redirect('/laporan')->with('status', 'Laporan '.$report->nomor_tiket.' berhasil dikirim.');
         }
 
         return redirect()->route('reports.package.edit', $report)->with('status', 'Draf paket '.$report->nomor_tiket.' berhasil diperbarui.');

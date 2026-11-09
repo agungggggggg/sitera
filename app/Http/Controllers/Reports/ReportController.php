@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reports;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Report;
 use App\Models\User;
-use App\Notifications\SiteraEventNotification;
-use App\Services\AuditLogger;
 use App\Services\RegionCatalog;
+use App\Services\ReportSubmissionService;
+use App\Services\ReportTicketGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -57,64 +59,31 @@ class ReportController extends Controller
         return redirect()->route('reports.show', $draft)->with('status', 'Draf '.$draft->nomor_tiket.' berhasil diperbarui.');
     }
 
-    public function submit(Request $request, int $report): RedirectResponse
+    public function submit(Request $request, int $report, ReportSubmissionService $submissionService): RedirectResponse
     {
         $reportModel = Report::query()
             ->whereKey($report)
             ->where('user_id', $request->user()->id)
             ->firstOrFail();
 
-        abort_if($reportModel->status !== 'DRAF', 422, 'Laporan yang sudah terkirim tidak dapat dikirim ulang.');
-        if ($reportModel->cpcl_id !== null) {
-            $categories = $reportModel->attachments()->where('versi', $reportModel->versi)->pluck('kategori')->unique()->all();
-            abort_unless(array_diff(['BAST', 'LPJ', 'DOKUMENTASI'], $categories) === [], 422, 'Lengkapi BAST, LPJ, dan dokumentasi sebelum mengirim laporan.');
-        } else {
-            abort_if($reportModel->attachments()->count() < 1, 422, 'Minimal satu lampiran wajib ditambahkan sebelum dikirim.');
-        }
-
-        $reportModel->forceFill([
-            'status' => 'TERKIRIM',
-            'dikirim_pada' => now(),
-        ])->save();
-
-        $isCorrection = $reportModel->koreksi_dari !== null;
-        $verifiers = User::query()->whereHas('role', fn ($query) => $query->where('code', 'verifikator_pusat'))->get();
-        foreach ($verifiers as $verifier) {
-            $verifier->notify(new SiteraEventNotification(
-                $isCorrection ? 'koreksi_dikirim' : 'laporan_baru',
-                $isCorrection ? 'Koreksi laporan baru' : 'Laporan baru masuk',
-                $reportModel->nomor_tiket.' telah dikirim dan menunggu pemeriksaan.',
-                $reportModel->id,
-                $reportModel->nomor_tiket,
-            ));
-        }
-
-        app(AuditLogger::class)->log($request->user(), 'report.submitted', 'success', 'report', $reportModel->id);
+        $submissionService->submit($request->user(), $reportModel);
 
         return redirect('/laporan')->with('status', 'Laporan '.$reportModel->nomor_tiket.' berhasil dikirim.');
     }
 
-    public function store(Request $request, RegionCatalog $regions): RedirectResponse
+    public function store(Request $request, RegionCatalog $regions, ReportTicketGenerator $ticketGenerator): RedirectResponse
     {
         $validated = $this->validatedReport($request, $regions);
 
-        $report = DB::transaction(function () use ($validated, $request): Report {
-            $date = Carbon::parse($validated['tanggal_kejadian']);
-            $prefix = 'LP-'.$date->format('Ymd').'-';
-            $last = Report::query()
-                ->where('nomor_tiket', 'like', $prefix.'%')
-                ->lockForUpdate()
-                ->orderByDesc('nomor_tiket')
-                ->value('nomor_tiket');
-            $sequence = $last ? ((int) substr($last, -4)) + 1 : 1;
-
-            return Report::create(array_merge($validated, [
+        $report = $ticketGenerator->generate(
+            $validated['tanggal_kejadian'],
+            fn (string $ticket): Report => Report::create(array_merge($validated, [
                 'user_id' => $request->user()->id,
-                'nomor_tiket' => $prefix.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT),
+                'nomor_tiket' => $ticket,
                 'status' => 'DRAF',
                 'sumber_isian' => 'MANUAL',
-            ]));
-        });
+            ]))
+        );
 
         return redirect('/laporan')->with('status', 'Draf laporan '.$report->nomor_tiket.' berhasil dibuat.');
     }

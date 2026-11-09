@@ -28,6 +28,34 @@ class CpclFoundationTest extends TestCase
         ]);
     }
 
+    public function test_admin_workspace_renders_manual_cpcl_form_with_csrf_token_and_correct_action(): void
+    {
+        $admin = $this->userWithRole('super_admin');
+
+        $response = $this->actingAs($admin)->get('/admin-only?view=cpcl');
+
+        $response->assertOk();
+        $response->assertSee('action="'.route('admin.cpcl.store').'"', false);
+        $response->assertSee('class="cpcl-admin-form"', false);
+        $response->assertSee('name="_token"', false);
+
+        $this->actingAs($admin)->post(route('admin.cpcl.store'), [
+            'nama_di' => 'DI Saluran Baru',
+            'provinsi' => 'Jawa Barat',
+            'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan',
+            'desa' => 'Mulyasari',
+            'kel_tani' => 'P3A Makmur Bersama',
+        ])
+            ->assertRedirect('/admin-only')
+            ->assertSessionHas('status', 'Data CPCL berhasil ditambahkan.');
+
+        $this->assertDatabaseHas('cpcl_records', [
+            'nama_di' => 'DI Saluran Baru',
+            'kel_tani' => 'P3A Makmur Bersama',
+        ]);
+    }
+
     public function test_duplicate_cpcl_identity_is_rejected(): void
     {
         $admin = $this->userWithRole('super_admin');

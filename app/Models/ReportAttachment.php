@@ -9,6 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['report_id', 'kategori', 'versi', 'path', 'original_name', 'mime_type', 'size_bytes'])]
 class ReportAttachment extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'versi' => 'integer',
+            'size_bytes' => 'integer',
+        ];
+    }
+
     public function report(): BelongsTo
     {
         return $this->belongsTo(Report::class);

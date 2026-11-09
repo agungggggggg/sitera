@@ -37,6 +37,7 @@ class Report extends Model
     protected function casts(): array
     {
         return [
+            'versi' => 'integer',
             'tanggal_kejadian' => 'date',
             'panjang_terdampak_m' => 'decimal:2',
             'luas_terdampak_ha' => 'decimal:2',

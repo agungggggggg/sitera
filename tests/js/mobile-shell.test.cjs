@@ -20,6 +20,14 @@ function setup(width = 390) {
   return { events, classes, documentEvents, toggle, nav, backdrop, window, document, firstLink, lastLink };
 }
 
+test('Super Admin prototype references the tracked XLSX vendor asset', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../../public/sitera/superadmin-review.html'), 'utf8');
+  const assetPath = path.join(__dirname, '../../public/sitera/vendor/xlsx.full.min.js');
+
+  assert.match(html, /<script src="\/sitera\/vendor\/xlsx\.full\.min\.js"><\/script>/);
+  assert.equal(fs.existsSync(assetPath), true);
+});
+
 test('drawer opens/closes accessibly, closes on Escape/backdrop/link, and resets on desktop resize', () => {
   const ui = setup();
   assert.equal(ui.nav.inert, true);

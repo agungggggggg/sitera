@@ -39,6 +39,7 @@ Gunakan versi dependensi yang dikunci dalam `composer.lock`. `package-lock.json`
    ```
 
 3. Salin `.env.example` ke `.env`, lalu konfigurasi `APP_URL`, koneksi database, session, cache, dan nilai aplikasi lain sesuai lingkungan. Jangan commit `.env` atau memasukkan credential ke source code.
+   Pastikan mengatur `SITERA_DEFAULT_PASSWORD` dengan nilai unik dan kuat khusus instalasi ini. Password ini merupakan kredensial awal sementara saat Super Admin mendaftarkan akun baru atau mereset akses pengguna. Setiap pengguna wajib mengganti password awal tersebut saat login pertama kali sebelum akun dapat diaktifkan.
 4. Buat application key:
 
    ```bash
@@ -108,7 +109,7 @@ Kompilasi cache Blade untuk memeriksa template:
 php artisan view:cache
 ```
 
-Baseline proyek yang tercatat saat dokumentasi ini diperbarui adalah **146 tes PHP dengan 888 assertions** dan **16 tes JavaScript**. Tes ini menggunakan konfigurasi pengujian; hasilnya bukan pengganti pengujian visual pada browser atau validasi deployment produksi.
+Baseline proyek yang tercatat saat dokumentasi ini diperbarui adalah **173 tes PHP dengan 1.045 assertions**, **17 tes JavaScript**, **48 routes**, dan **33 template Blade**. Tes ini menggunakan konfigurasi pengujian; hasilnya bukan pengganti pengujian visual pada browser atau validasi deployment produksi.
 
 ## Struktur direktori
 

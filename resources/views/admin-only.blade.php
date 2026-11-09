@@ -123,7 +123,9 @@
     <section id="view-cpcl" class="view active">
         <section class="panel table-panel"><div class="panel-heading"><div><h2>Referensi CPCL</h2><p>Kelola data kelompok tani dan identitas wilayah pada satu referensi.</p></div></div>
             <details id="cpcl-create" class="account-form-toggle"><summary>＋ Tambah CPCL secara manual</summary>
-                <form method="post" action="{{ route('admin.cpcl.store') }}" class="cpcl-admin-form"><div class="cpcl-fields-grid">
+                <form method="post" action="{{ route('admin.cpcl.store') }}" class="cpcl-admin-form">
+                    @csrf
+                    <div class="cpcl-fields-grid">
                     @foreach ([['no','No.'],['nama_di','Nama DI'],['kewenangan','Kewenangan'],['keterangan','Keterangan'],['provinsi','Provinsi'],['kabupaten','Kabupaten/Kota'],['kecamatan','Kecamatan'],['desa','Desa/Kelurahan'],['kel_tani','Kelompok Tani'],['nama_ketua','Nama Ketua'],['realisasi','Realisasi'],['luas_ha','Luas (ha)'],['x','X'],['y','Y']] as [$field,$label])<label>{{ $label }}@if (in_array($field,['nama_di','provinsi','kabupaten','kecamatan','desa','kel_tani'],true)<span class="required-mark">*</span>@endif<input name="{{ $field }}" value="{{ old($field) }}" @if (in_array($field,['nama_di','provinsi','kabupaten','kecamatan','desa','kel_tani'],true)) required @endif @if ($field==='luas_ha') type="number" min="0" step="0.01" @endif></label>@endforeach
                 </div><div class="form-actions"><button class="btn btn-primary" type="submit">Simpan CPCL</button></div></form>
             </details>
