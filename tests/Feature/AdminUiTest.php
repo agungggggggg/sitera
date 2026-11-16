@@ -27,14 +27,16 @@ class AdminUiTest extends TestCase
             ->assertSee('/sitera/superadmin-review.css')
             ->assertSee('/sitera/sitera-logo.webp')
             ->assertSee('Catat calon pengguna, verifikasi PIC')
-            ->assertSee('Username')
+            ->assertSee('<th>Email</th>', false)
             ->assertSee('name="email" type="email"', false)
             ->assertSee('flex-wrap:nowrap', false)
             ->assertSee('Reset akses')
             ->assertSee('Verifikasi PIC')
             ->assertSee('Menunggu verifikasi PIC')
-            ->assertSee('× Hapus')
+            ->assertSee('Hapus akun')
             ->assertSee('Nonaktifkan')
+            ->assertSee('acc-status', false)
+            ->assertSee('delete-action', false)
             ->assertSee('Akun nonaktif ditolak');
     }
 

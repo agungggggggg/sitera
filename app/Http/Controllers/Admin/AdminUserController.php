@@ -15,9 +15,18 @@ use Illuminate\Validation\ValidationException;
 
 class AdminUserController extends Controller
 {
+    /**
+     * Placeholder identity used until the account owner completes first-login activation.
+     */
+    private const PENDING_NAME = 'Pengguna Baru';
+
     public function verifyPic(Request $request, User $user): RedirectResponse
     {
-        abort_unless($user->role?->code === 'pelapor_daerah' && filled($user->contact), 404);
+        abort_unless(
+            $user->role?->code === 'pelapor_daerah'
+            && (filled($user->contact) || ! $user->must_change_password),
+            404
+        );
 
         if ($user->pic_verified_at) {
             return redirect('/admin-only?view=accounts')->with('status', 'PIC akun tersebut sudah diverifikasi.');
@@ -66,15 +75,12 @@ class AdminUserController extends Controller
     public function store(Request $request, RegionCatalog $regions): RedirectResponse
     {
         abort_unless(is_string(config('sitera.default_password')) && config('sitera.default_password') !== '', 503, 'Password default belum dikonfigurasi.');
-        $request->merge(['username' => mb_strtolower(trim((string) $request->input('username', '')))]);
+        $request->merge(['email' => mb_strtolower(trim((string) $request->input('email', '')))]);
 
         $province = (string) $request->input('provinsi', '');
         $regencies = array_column($regions->regenciesFor($province), 'value');
         $validated = $request->validate([
-            'username' => ['required', 'string', 'min:3', 'max:80', 'regex:/^[a-z0-9._-]+$/', 'unique:users,username'],
-            'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'contact' => ['nullable', 'string', 'max:50'],
             'role' => ['required', Rule::in(['pelapor_daerah', 'verifikator_pusat', 'pimpinan_kementan'])],
             'provinsi' => ['nullable', 'required_if:role,pelapor_daerah', 'string', Rule::in($regions->provinceNames())],
             'kabupaten' => ['nullable', 'required_if:role,pelapor_daerah', 'string', Rule::in($regencies)],
@@ -93,10 +99,10 @@ class AdminUserController extends Controller
         $role = Role::firstOrCreate(['code' => $validated['role']], ['name' => $roleNames[$validated['role']]]);
 
         $createdUser = User::create([
-            'username' => strtolower($validated['username']),
-            'name' => $validated['name'],
+            'username' => null,
+            'name' => self::PENDING_NAME,
             'email' => $validated['email'],
-            'contact' => $validated['contact'] ?? null,
+            'contact' => null,
             'role_id' => $role->id,
             'provinsi' => $validated['provinsi'] ?? null,
             'kabupaten' => $validated['kabupaten'] ?? null,
@@ -107,6 +113,6 @@ class AdminUserController extends Controller
 
         app(AuditLogger::class)->log($request->user(), 'user.created', 'success', 'user', $createdUser->id);
 
-        return redirect('/admin-only?view=accounts')->with('status', 'Akun '.$validated['username'].' dibuat. Status Menunggu aktivasi; pengguna wajib mengganti password awal saat login pertama.');
+        return redirect('/admin-only?view=accounts')->with('status', 'Akun '.$validated['email'].' dibuat. Status Menunggu aktivasi; pengguna melengkapi nama PIC dan membuat password baru saat login pertama.');
     }
 }

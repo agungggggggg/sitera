@@ -26,8 +26,17 @@ class FirstPasswordChangeController extends Controller
         $user = $request->user();
         abort_unless($user->must_change_password, 404);
         $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'contact' => ['nullable', 'string', 'max:50'],
+            'email_confirmation' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed', 'max:255'],
         ]);
+
+        if (mb_strtolower(trim($validated['email_confirmation'])) !== mb_strtolower((string) $user->email)) {
+            throw ValidationException::withMessages([
+                'email_confirmation' => 'Email yang diketik ulang tidak cocok dengan email akun ini.',
+            ]);
+        }
 
         if (Hash::check($validated['password'], $user->password)) {
             throw ValidationException::withMessages(['password' => 'Password baru harus berbeda dari password awal.']);
@@ -40,6 +49,8 @@ class FirstPasswordChangeController extends Controller
                 throw ValidationException::withMessages(['password' => 'Password baru harus berbeda dari password awal.']);
             }
             $lockedUser->forceFill([
+                'name' => $validated['name'],
+                'contact' => $validated['contact'] ?? null,
                 'password' => Hash::make($validated['password']),
                 'must_change_password' => false,
                 'is_active' => true,
@@ -50,6 +61,6 @@ class FirstPasswordChangeController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('status', 'Password berhasil diubah dan akun telah diaktifkan. Silakan masuk menggunakan username dan password baru.');
+        return redirect()->route('login')->with('status', 'Akun berhasil diverifikasi dan diaktifkan. Silakan masuk menggunakan email dan password baru Anda.');
     }
 }
