@@ -6,6 +6,7 @@ use App\Models\Report;
 use App\Models\User;
 use App\Notifications\SiteraEventNotification;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class ReportSubmissionService
@@ -17,7 +18,7 @@ class ReportSubmissionService
     /**
      * Atomically submit a draft report, transition its status, notify verifiers, and record an audit log.
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     * @throws HttpException
      */
     public function submit(User $actor, Report $report): Report
     {

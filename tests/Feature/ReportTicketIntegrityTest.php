@@ -7,7 +7,6 @@ use App\Models\Report;
 use App\Models\ReportVerification;
 use App\Models\Role;
 use App\Models\User;
-use App\Services\RegionCatalog;
 use App\Services\ReportTicketGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -215,6 +214,7 @@ class ReportTicketIntegrityTest extends TestCase
     private function pelapor(): User
     {
         $role = Role::firstOrCreate(['code' => 'pelapor_daerah'], ['name' => 'Pelapor Daerah']);
+
         return User::factory()->create([
             'role_id' => $role->id,
             'provinsi' => 'Jawa Barat',
@@ -225,6 +225,7 @@ class ReportTicketIntegrityTest extends TestCase
     private function verifier(): User
     {
         $role = Role::firstOrCreate(['code' => 'verifikator_pusat'], ['name' => 'Verifikator Pusat']);
+
         return User::factory()->create(['role_id' => $role->id]);
     }
 }

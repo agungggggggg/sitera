@@ -11,6 +11,7 @@ use ZipArchive;
 class CpclSpreadsheetReader
 {
     private const MAX_ROWS = 5000;
+
     private const MAX_EXPANDED_BYTES = 30_000_000;
 
     private const ALIASES = [
@@ -67,11 +68,11 @@ class CpclSpreadsheetReader
 
     private function readXlsx(string $path): array
     {
-        if (!class_exists(ZipArchive::class)) {
+        if (! class_exists(ZipArchive::class)) {
             throw new RuntimeException('Ekstensi ZIP PHP tidak tersedia untuk membaca XLSX.');
         }
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($path) !== true) {
             throw new RuntimeException('File XLSX tidak valid atau rusak.');
         }
@@ -96,7 +97,7 @@ class CpclSpreadsheetReader
             $workbookXpath->registerNamespace('m', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
             $workbookXpath->registerNamespace('r', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships');
             $sheet = $workbookXpath->query('//m:sheets/m:sheet')->item(0);
-            if (!$sheet instanceof \DOMElement) {
+            if (! $sheet instanceof \DOMElement) {
                 throw new RuntimeException('Workbook XLSX tidak memiliki sheet.');
             }
             $relationId = $sheet->getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
@@ -123,7 +124,7 @@ class CpclSpreadsheetReader
             foreach ($xpath->query('//m:sheetData/m:row') as $row) {
                 $cells = [];
                 foreach ($xpath->query('./m:c', $row) as $cell) {
-                    if (!$cell instanceof \DOMElement) {
+                    if (! $cell instanceof \DOMElement) {
                         continue;
                     }
                     if ($xpath->query('./m:f', $cell)->length > 0) {
@@ -138,7 +139,9 @@ class CpclSpreadsheetReader
                     if ($type === 'inlineStr') {
                         $value = $xpath->query('./m:is//m:t', $cell);
                         $text = '';
-                        foreach ($value as $part) $text .= $part->textContent;
+                        foreach ($value as $part) {
+                            $text .= $part->textContent;
+                        }
                     } else {
                         $value = $xpath->query('./m:v', $cell)->item(0)?->textContent ?? '';
                         $text = $type === 's' ? ($strings[(int) $value] ?? '') : $value;
@@ -163,28 +166,31 @@ class CpclSpreadsheetReader
     private function xml(ZipArchive $zip, string $name): DOMDocument
     {
         $contents = $zip->getFromName($name);
-        if (!is_string($contents) || strlen($contents) > self::MAX_EXPANDED_BYTES) {
+        if (! is_string($contents) || strlen($contents) > self::MAX_EXPANDED_BYTES) {
             throw new RuntimeException('Struktur XLSX tidak lengkap atau terlalu besar.');
         }
 
-        $document = new DOMDocument();
+        $document = new DOMDocument;
         $document->resolveExternals = false;
         $document->substituteEntities = false;
-        if (!$document->loadXML($contents, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_NOERROR | LIBXML_NOWARNING)) {
+        if (! $document->loadXML($contents, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_NOERROR | LIBXML_NOWARNING)) {
             throw new RuntimeException('XML dalam XLSX tidak valid.');
         }
+
         return $document;
     }
 
     private function sharedStrings(ZipArchive $zip): array
     {
         $contents = $zip->getFromName('xl/sharedStrings.xml');
-        if (!is_string($contents)) return [];
+        if (! is_string($contents)) {
+            return [];
+        }
 
-        $document = new DOMDocument();
+        $document = new DOMDocument;
         $document->resolveExternals = false;
         $document->substituteEntities = false;
-        if (!$document->loadXML($contents, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_NOERROR | LIBXML_NOWARNING)) {
+        if (! $document->loadXML($contents, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_NOERROR | LIBXML_NOWARNING)) {
             throw new RuntimeException('Shared strings XLSX tidak valid.');
         }
         $xpath = new DOMXPath($document);
@@ -192,9 +198,12 @@ class CpclSpreadsheetReader
         $strings = [];
         foreach ($xpath->query('//m:si') as $item) {
             $text = '';
-            foreach ($xpath->query('.//m:t', $item) as $part) $text .= $part->textContent;
+            foreach ($xpath->query('.//m:t', $item) as $part) {
+                $text .= $part->textContent;
+            }
             $strings[] = $text;
         }
+
         return $strings;
     }
 
@@ -210,7 +219,9 @@ class CpclSpreadsheetReader
             foreach ($row as $column => $label) {
                 $normalized = preg_replace('/[^a-z0-9]/', '', strtolower((string) $label));
                 foreach (self::ALIASES as $field => $aliases) {
-                    if (in_array($normalized, $aliases, true)) $candidate[$field] = $column;
+                    if (in_array($normalized, $aliases, true)) {
+                        $candidate[$field] = $column;
+                    }
                 }
             }
             if (isset($candidate['nama_di'], $candidate['provinsi'], $candidate['kabupaten'], $candidate['kel_tani'])) {
@@ -229,18 +240,23 @@ class CpclSpreadsheetReader
             foreach (self::ALIASES as $field => $_) {
                 $record[$field] = isset($mapping[$field]) ? trim((string) ($row[$mapping[$field]] ?? '')) : '';
             }
-            if (count(array_filter($record, static fn ($value) => $value !== '')) === 0) continue;
+            if (count(array_filter($record, static fn ($value) => $value !== '')) === 0) {
+                continue;
+            }
             $record['_row'] = $rowIndex + 1;
             $rows[] = $record;
         }
+
         return $rows;
     }
 
     private function columnIndex(string $letters): int
     {
         $index = 0;
-        foreach (str_split($letters) as $letter) $index = $index * 26 + (ord($letter) - 64);
+        foreach (str_split($letters) as $letter) {
+            $index = $index * 26 + (ord($letter) - 64);
+        }
+
         return $index - 1;
     }
 }
-

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Verification;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\CpclRecord;
 use App\Models\Report;
 use App\Models\ReportVerification;

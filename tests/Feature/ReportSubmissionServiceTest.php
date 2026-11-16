@@ -2,15 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\AuditLog;
 use App\Models\CpclRecord;
 use App\Models\Report;
 use App\Models\ReportVerification;
 use App\Models\Role;
 use App\Models\User;
-use App\Services\ReportSubmissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -58,7 +57,7 @@ class ReportSubmissionServiceTest extends TestCase
             'subject_type' => 'report',
             'subject_id' => (string) $report->id,
         ]);
-        $this->assertSame(1, \App\Models\AuditLog::where('subject_type', 'report')->where('subject_id', (string) $report->id)->count());
+        $this->assertSame(1, AuditLog::where('subject_type', 'report')->where('subject_id', (string) $report->id)->count());
 
         // Verify notification
         $notification = $verifier->notifications()->first();
@@ -311,20 +310,21 @@ class ReportSubmissionServiceTest extends TestCase
         // First submission succeeds
         $this->actingAs($reporter)->post('/laporan/'.$report->id.'/kirim')->assertRedirect('/laporan');
         $this->assertSame('TERKIRIM', $report->fresh()->status);
-        $this->assertSame(1, \App\Models\AuditLog::where('subject_id', (string) $report->id)->count());
+        $this->assertSame(1, AuditLog::where('subject_id', (string) $report->id)->count());
         $this->assertSame(1, $verifier->notifications()->count());
 
         // Second submission fails with 422
         $this->actingAs($reporter)->post('/laporan/'.$report->id.'/kirim')->assertStatus(422);
 
         // Counts must still be exactly 1
-        $this->assertSame(1, \App\Models\AuditLog::where('subject_id', (string) $report->id)->count());
+        $this->assertSame(1, AuditLog::where('subject_id', (string) $report->id)->count());
         $this->assertSame(1, $verifier->notifications()->count());
     }
 
     private function reporter(): User
     {
         $role = Role::firstOrCreate(['code' => 'pelapor_daerah'], ['name' => 'Pelapor Daerah']);
+
         return User::factory()->create([
             'role_id' => $role->id,
             'provinsi' => 'Jawa Barat',
@@ -335,6 +335,7 @@ class ReportSubmissionServiceTest extends TestCase
     private function verifier(): User
     {
         $role = Role::firstOrCreate(['code' => 'verifikator_pusat'], ['name' => 'Verifikator Pusat']);
+
         return User::factory()->create(['role_id' => $role->id]);
     }
 

@@ -5,12 +5,10 @@ namespace Tests\Feature;
 use App\Models\CpclImportBatch;
 use App\Models\CpclRecord;
 use App\Models\Report;
-use App\Models\ReportAttachment;
 use App\Models\ReportVerification;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class ModelImprovementsTest extends TestCase
@@ -183,6 +181,7 @@ class ModelImprovementsTest extends TestCase
     private function userWithRole(string $code): User
     {
         $role = Role::firstOrCreate(['code' => $code], ['name' => str_replace('_', ' ', $code)]);
+
         return User::factory()->create([
             'role_id' => $role->id,
             'provinsi' => 'Jawa Barat',

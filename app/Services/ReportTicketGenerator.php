@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Report;
 use Carbon\CarbonInterface;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -18,8 +17,10 @@ class ReportTicketGenerator
      * Allocate the next ticket number and execute the creation callback within a locked transaction.
      *
      * @template T
+     *
      * @param  CarbonInterface|string  $date
      * @param  callable(string): T  $creator
+     * @param  string|null  $connectionName
      * @return T
      */
     public function generate(CarbonInterface|string $date, callable $creator, ?string $connectionName = null): mixed

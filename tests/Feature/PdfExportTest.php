@@ -78,6 +78,7 @@ class PdfExportTest extends TestCase
     private function person(string $code): User
     {
         $role = Role::firstOrCreate(['code' => $code], ['name' => $code]);
+
         return User::factory()->create(['role_id' => $role->id]);
     }
 

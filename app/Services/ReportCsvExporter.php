@@ -70,7 +70,6 @@ class ReportCsvExporter
     /**
      * Transform a single report instance to ordered CSV row fields.
      *
-     * @param  mixed  $report
      * @return array<int, string|null>
      */
     public function formatRow(mixed $report): array

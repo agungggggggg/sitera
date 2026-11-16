@@ -140,6 +140,7 @@ class ReportCorrectionSubmitTest extends TestCase
     private function userWithRole(string $code): User
     {
         $role = Role::firstOrCreate(['code' => $code], ['name' => str_replace('_', ' ', $code)]);
+
         return User::factory()->create(['role_id' => $role->id]);
     }
 }

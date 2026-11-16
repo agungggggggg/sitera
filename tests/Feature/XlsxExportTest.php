@@ -25,10 +25,10 @@ class XlsxExportTest extends TestCase
         $response->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $response->assertHeader('content-disposition');
         $body = $response->getContent();
-        $this->assertStringStartsWith("PK", $body);
+        $this->assertStringStartsWith('PK', $body);
         $temporary = tempnam(sys_get_temp_dir(), 'sitera-xlsx-test-');
         file_put_contents($temporary, $body);
-        $archive = new \ZipArchive();
+        $archive = new \ZipArchive;
         $this->assertTrue($archive->open($temporary) === true);
         $sheet = $archive->getFromName('xl/worksheets/sheet1.xml');
         $archive->close();

@@ -3,16 +3,12 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Report;
-use App\Models\User;
 use App\Services\RegionCatalog;
 use App\Services\ReportSubmissionService;
 use App\Services\ReportTicketGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 

@@ -15,7 +15,7 @@ class ReportXlsxExporter
             throw new RuntimeException('Tidak dapat membuat file sementara ekspor.');
         }
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($temporary, ZipArchive::OVERWRITE) !== true) {
             @unlink($temporary);
             throw new RuntimeException('Tidak dapat menyusun berkas Excel.');
@@ -59,6 +59,7 @@ class ReportXlsxExporter
         }
 
         $lastRow = max(1, $row - 1);
+
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
             .'<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
@@ -74,6 +75,7 @@ class ReportXlsxExporter
             $style = $header ? ' s="1"' : '';
             $cells .= '<c r="'.$column.$number.'" t="inlineStr"'.$style.'><is><t xml:space="preserve">'.$this->escape((string) ($value ?? '')).'</t></is></c>';
         }
+
         return '<row r="'.$number.'">'.$cells.'</row>';
     }
 
@@ -85,6 +87,7 @@ class ReportXlsxExporter
             $name = chr(65 + ($index % 26)).$name;
             $index = intdiv($index, 26);
         }
+
         return $name;
     }
 

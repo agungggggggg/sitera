@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

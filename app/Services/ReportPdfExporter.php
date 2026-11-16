@@ -10,7 +10,7 @@ class ReportPdfExporter
 {
     public function export(Collection $reports): string
     {
-        $options = new Options();
+        $options = new Options;
         $options->set('isRemoteEnabled', false);
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml(view('exports.rekap-pdf', ['reports' => $reports])->render(), 'UTF-8');

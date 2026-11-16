@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\ReportAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;

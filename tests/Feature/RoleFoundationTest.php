@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -30,7 +31,7 @@ class RoleFoundationTest extends TestCase
     {
         $this->seed();
 
-        $user = \App\Models\User::factory()->create([
+        $user = User::factory()->create([
             'role_id' => \DB::table('roles')->where('code', 'pelapor_daerah')->value('id'),
         ]);
 

@@ -32,7 +32,7 @@ class RegionCatalog
         $normalized = array_map(fn (string $name): string => preg_replace('/^(Kabupaten|Kota) /u', '', $name), $official);
         $counts = array_count_values($normalized);
 
-        return array_map(function (string $name) use ($normalized, $counts): array {
+        return array_map(function (string $name) use ($counts): array {
             $value = preg_replace('/^(Kabupaten|Kota) /u', '', $name);
             if ($counts[$value] > 1) {
                 $value = $name;

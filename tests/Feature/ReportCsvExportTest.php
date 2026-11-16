@@ -10,6 +10,7 @@ use App\Services\ReportCsvExporter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;
 
 class ReportCsvExportTest extends TestCase
@@ -225,7 +226,7 @@ class ReportCsvExportTest extends TestCase
         $request->setUserResolver(fn () => $executive);
 
         $response = $controller->csv($request);
-        $this->assertInstanceOf(\Symfony\Component\HttpFoundation\StreamedResponse::class, $response);
+        $this->assertInstanceOf(StreamedResponse::class, $response);
 
         ob_start();
         $response->sendContent();
@@ -238,9 +239,10 @@ class ReportCsvExportTest extends TestCase
     private function userWithRole(string $code, ?string $name = null): User
     {
         $role = Role::firstOrCreate(['code' => $code], ['name' => str_replace('_', ' ', $code)]);
+
         return User::factory()->create([
             'role_id' => $role->id,
-            'name' => $name ?? 'User ' . $code,
+            'name' => $name ?? 'User '.$code,
         ]);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Verification;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Report;
 use App\Models\ReportVerification;
 use Illuminate\Database\Eloquent\Builder;
