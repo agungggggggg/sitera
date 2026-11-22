@@ -35,8 +35,9 @@
             @endif
             @if ($user->role?->code === 'super_admin')
                 <a class="{{ request()->is('admin-only') ? 'active' : '' }}" href="{{ url('/admin-only') }}"><span class="ico">⚙</span><span>Manajemen Akun</span></a>
+            @else
+                <a href="{{ route('exports.csv', ['format' => 'xlsx']) }}"><span class="ico">⇩</span><span>Ekspor rekap</span></a>
             @endif
-            <a href="{{ route('exports.csv', ['format' => 'xlsx']) }}"><span class="ico">⇩</span><span>Ekspor rekap</span></a>
         </nav>
         <div class="nav-label" style="margin-top:28px">Bantuan</div>
         <nav class="nav"><a class="nav-item" href="#panduan" onclick="return false"><span class="ico">?</span><span>Panduan singkat</span></a></nav>
@@ -49,10 +50,8 @@
             <div class="crumb">SITERA <span>/</span> <b>@yield('breadcrumb', 'Ringkasan')</b></div>
             <div class="top-actions">
                 <a style="position:relative" class="icon-btn notification-link" href="{{ route('notifications.index') }}" title="Notifikasi" aria-label="Notifikasi">♧@php($unreadNotifications = $user->unreadNotifications()->count())@if ($unreadNotifications)<span class="unread-count">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>@endif</a>
-                <form method="post" action="{{ route('logout') }}" class="user-chip-form">
-                    @csrf
-                    <button class="user-chip" type="submit" title="Keluar"><span class="avatar mini">{{ $initials ?: 'U' }}</span><span>{{ $user->name }}</span>↪</button>
-                </form>
+                <div class="user-chip"><span class="avatar mini">{{ $initials ?: 'U' }}</span><span>{{ $user->name }}</span></div>
+                @include('partials.logout-button')
             </div>
         </header>
         <div class="content">@yield('content')</div>

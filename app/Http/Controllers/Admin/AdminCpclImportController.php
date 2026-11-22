@@ -8,8 +8,10 @@ use App\Models\CpclRecord;
 use App\Services\AuditLogger;
 use App\Services\CpclImportClassifier;
 use App\Services\CpclSpreadsheetReader;
+use App\Services\CpclTemplateXlsxExporter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use RuntimeException;
@@ -19,17 +21,22 @@ class AdminCpclImportController extends Controller
     public function preview(Request $request, CpclSpreadsheetReader $reader, CpclImportClassifier $classifier): View|RedirectResponse
     {
         $validated = $request->validate([
-            'file' => ['required', 'file', 'max:10240', 'mimes:csv,xlsx'],
+            'file' => ['required', 'file', 'max:10240', 'mimes:csv,txt'],
+        ], [
+            'file.mimes' => 'Format impor CPCL hanya mendukung file CSV (.csv).',
         ]);
 
         try {
             $rows = $reader->read($validated['file']);
         } catch (RuntimeException $exception) {
-            return back()->withErrors(['file' => $exception->getMessage()])->withInput();
+            return redirect()->route('admin.index', ['view' => 'imports'])
+                ->withErrors(['file' => $exception->getMessage()])
+                ->withInput();
         }
 
         if (count($rows) > 5000) {
-            return back()->withErrors(['file' => 'Maksimal 5.000 baris data per file.']);
+            return redirect()->route('admin.index', ['view' => 'imports'])
+                ->withErrors(['file' => 'Maksimal 5.000 baris data per file.']);
         }
 
         [$classified, $summary] = $classifier->classify($rows);
@@ -88,19 +95,25 @@ class AdminCpclImportController extends Controller
         app(AuditLogger::class)->log($request->user(), 'cpcl.import_confirmed', 'success', 'import_batch', $batch->id, ['created_count' => $result['added'], 'skipped_count' => array_sum($result['skipped'])]);
         $summary = 'Impor CPCL selesai: '.$result['added'].' ditambahkan, '.$result['skipped']['Duplikat'].' duplikat, '.$result['skipped']['Konflik'].' konflik, '.$result['skipped']['Tidak valid'].' tidak valid dilewati. Data lama tidak ditimpa.';
 
-        return redirect('/admin-only')->with('status', $summary);
+        return redirect()->route('admin.index', ['view' => 'imports'])
+            ->with('status', $summary)
+            ->with('import_result', [
+                'source_name' => $batch->source_name,
+                'added' => $result['added'],
+                'duplicate' => $result['skipped']['Duplikat'],
+                'conflict' => $result['skipped']['Konflik'],
+                'invalid' => $result['skipped']['Tidak valid'],
+                'confirmed_at' => now()->translatedFormat('d M Y, H.i'),
+            ]);
     }
 
-    public function template()
+    public function template(CpclTemplateXlsxExporter $exporter): Response
     {
-        $headers = ['No.', 'Nama DI', 'Kewenangan', 'Keterangan', 'Provinsi', 'Kab_Kota', 'Kecamatan', 'Desa/Kelurahan', 'Kel_Tani', 'Nama Ketua', 'Realisasi', 'Luas_ha', 'X', 'Y'];
-
-        return response()->streamDownload(static function () use ($headers): void {
-            $output = fopen('php://output', 'wb');
-            fwrite($output, '\\xEF\\xBB\\xBF');
-            fputcsv($output, $headers);
-            fclose($output);
-        }, 'template-impor-cpcl-sitera.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return response($exporter->export(), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="template-impor-cpcl-sitera.xlsx"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        ]);
     }
 
     public function cancel(Request $request, CpclImportBatch $batch): RedirectResponse
@@ -111,6 +124,7 @@ class AdminCpclImportController extends Controller
             app(AuditLogger::class)->log($request->user(), 'cpcl.import_cancelled', 'success', 'import_batch', $batch->id);
         }
 
-        return redirect('/admin-only')->with('status', 'Batch impor dibatalkan; data CPCL tidak diubah.');
+        return redirect()->route('admin.index', ['view' => 'imports'])
+            ->with('status', 'Batch impor dibatalkan; data CPCL tidak diubah.');
     }
 }

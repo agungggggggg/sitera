@@ -101,8 +101,12 @@ Route::middleware(['auth', 'active'])->group(function (): void {
             ->name('admin.users.store');
         Route::post('/admin/cpcl', [AdminCpclController::class, 'store'])
             ->name('admin.cpcl.store');
-        Route::get('/admin/cpcl/template.csv', [AdminCpclImportController::class, 'template'])
+        Route::get('/admin/cpcl/template.xlsx', [AdminCpclImportController::class, 'template'])
             ->name('admin.cpcl.import.template');
+        Route::redirect('/admin/cpcl/template.csv', '/admin/cpcl/template.xlsx');
+        Route::delete('/admin/cpcl/{cpcl}', [AdminCpclController::class, 'destroy'])
+            ->whereNumber('cpcl')
+            ->name('admin.cpcl.destroy');
         Route::post('/admin/cpcl/import/preview', [AdminCpclImportController::class, 'preview'])
             ->name('admin.cpcl.import.preview');
         Route::post('/admin/cpcl/import/{batch}/confirm', [AdminCpclImportController::class, 'confirm'])

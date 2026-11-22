@@ -88,6 +88,63 @@ class CpclFoundationTest extends TestCase
         $this->assertSame($cpcl->id, $report->cpclRecord->id);
     }
 
+    public function test_super_admin_can_delete_unused_cpcl_record_and_records_audit(): void
+    {
+        $admin = $this->userWithRole('super_admin');
+        $cpcl = CpclRecord::create($this->cpclData());
+
+        $this->actingAs($admin)->delete(route('admin.cpcl.destroy', $cpcl))
+            ->assertRedirect(route('admin.index', ['view' => 'cpcl']))
+            ->assertSessionHas('status', 'Data CPCL berhasil dihapus.');
+
+        $this->assertDatabaseMissing('cpcl_records', ['id' => $cpcl->id]);
+        $this->assertDatabaseHas('audit_logs', [
+            'actor_id' => $admin->id,
+            'action' => 'cpcl.deleted',
+            'result' => 'success',
+            'subject_type' => 'cpcl',
+            'subject_id' => (string) $cpcl->id,
+        ]);
+    }
+
+    public function test_cpcl_record_with_existing_reports_cannot_be_deleted(): void
+    {
+        $admin = $this->userWithRole('super_admin');
+        $reporterRole = Role::firstOrCreate(['code' => 'pelapor_daerah'], ['name' => 'Pelapor Daerah']);
+        $reporter = User::factory()->create(['role_id' => $reporterRole->id]);
+        $cpcl = CpclRecord::create($this->cpclData());
+        Report::create([
+            'user_id' => $reporter->id,
+            'cpcl_id' => $cpcl->id,
+            'nomor_tiket' => 'LP-20261101-9882',
+            'status' => 'DRAF',
+            'tanggal_kejadian' => '2026-10-30',
+            'provinsi' => 'Jawa Barat',
+            'kabupaten' => 'Subang',
+            'jenis_kerusakan' => 'Paket CPCL',
+            'deskripsi' => 'Laporan terhubung ke CPCL.',
+            'sumber_isian' => 'MANUAL',
+        ]);
+
+        $this->actingAs($admin)->from(route('admin.index', ['view' => 'cpcl']))
+            ->delete(route('admin.cpcl.destroy', $cpcl))
+            ->assertRedirect(route('admin.index', ['view' => 'cpcl']))
+            ->assertSessionHasErrors('cpcl');
+
+        $this->assertDatabaseHas('cpcl_records', ['id' => $cpcl->id]);
+    }
+
+    public function test_non_super_admin_cannot_delete_cpcl_record(): void
+    {
+        $reporter = $this->userWithRole('pelapor_daerah');
+        $cpcl = CpclRecord::create($this->cpclData());
+
+        $this->actingAs($reporter)->delete(route('admin.cpcl.destroy', $cpcl))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('cpcl_records', ['id' => $cpcl->id]);
+    }
+
     private function cpclData(): array
     {
         return [

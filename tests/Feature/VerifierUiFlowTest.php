@@ -23,7 +23,11 @@ class VerifierUiFlowTest extends TestCase
             ->assertSee('Ringkasan pemeriksaan')
             ->assertSee('1')
             ->assertSee($report->nomor_tiket)
-            ->assertSee('Rekap Status CPCL');
+            ->assertSee('Rekap Status CPCL')
+            ->assertSee('Cakupan Diagram')
+            ->assertSee('BAST sudah sesuai')
+            ->assertSee('BAST belum sesuai')
+            ->assertSee('Poktan belum melapor');
     }
 
     public function test_queue_filters_submitted_unreviewed_reports_and_opens_review_detail(): void

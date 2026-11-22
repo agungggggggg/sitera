@@ -2,17 +2,12 @@
 
 namespace App\Services;
 
-use DOMDocument;
-use DOMXPath;
 use Illuminate\Http\UploadedFile;
 use RuntimeException;
-use ZipArchive;
 
 class CpclSpreadsheetReader
 {
     private const MAX_ROWS = 5000;
-
-    private const MAX_EXPANDED_BYTES = 30_000_000;
 
     private const ALIASES = [
         'no' => ['no', 'nomor'],
@@ -31,17 +26,28 @@ class CpclSpreadsheetReader
         'y' => ['y'],
     ];
 
+    /**
+     * Read and map rows from an uploaded CPCL CSV file.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public function read(UploadedFile $file): array
     {
-        return match (strtolower($file->getClientOriginalExtension())) {
-            'csv' => $this->readCsv($file->getRealPath()),
-            'xlsx' => $this->readXlsx($file->getRealPath()),
-            default => throw new RuntimeException('Format harus CSV atau XLSX.'),
-        };
+        if (strtolower($file->getClientOriginalExtension()) !== 'csv') {
+            throw new RuntimeException('Format impor CPCL hanya mendukung file CSV (.csv).');
+        }
+
+        return $this->readCsv($file->getRealPath());
     }
 
+    /**
+     * Parse CSV rows using auto-detected comma or semicolon delimiter.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     private function readCsv(string $path): array
     {
+        $delimiter = $this->detectDelimiter($path);
         $handle = fopen($path, 'rb');
         if ($handle === false) {
             throw new RuntimeException('File CSV tidak dapat dibaca.');
@@ -49,9 +55,9 @@ class CpclSpreadsheetReader
 
         try {
             $rows = [];
-            while (($row = fgetcsv($handle)) !== false) {
+            while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
                 $rows[] = array_map(static fn ($value) => is_string($value) ? trim($value) : '', $row);
-                if (count($rows) > self::MAX_ROWS + 1) {
+                if (count($rows) > self::MAX_ROWS + 10) {
                     throw new RuntimeException('Maksimal 5.000 baris data per file.');
                 }
             }
@@ -66,176 +72,68 @@ class CpclSpreadsheetReader
         return $this->mapRows($rows);
     }
 
-    private function readXlsx(string $path): array
+    private function detectDelimiter(string $path): string
     {
-        if (! class_exists(ZipArchive::class)) {
-            throw new RuntimeException('Ekstensi ZIP PHP tidak tersedia untuk membaca XLSX.');
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            return ',';
         }
 
-        $zip = new ZipArchive;
-        if ($zip->open($path) !== true) {
-            throw new RuntimeException('File XLSX tidak valid atau rusak.');
-        }
+        $commaScore = 0;
+        $semicolonScore = 0;
 
         try {
-            if ($zip->numFiles > 500 || $zip->locateName('xl/vbaProject.bin') !== false) {
-                throw new RuntimeException('File XLSX dengan makro atau struktur berlebihan tidak diizinkan.');
-            }
-
-            $expanded = 0;
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $stat = $zip->statIndex($i);
-                $expanded += (int) ($stat['size'] ?? 0);
-                if ($expanded > self::MAX_EXPANDED_BYTES) {
-                    throw new RuntimeException('Ukuran konten XLSX setelah dibuka terlalu besar.');
+            $checked = 0;
+            while ($checked < 10 && ($line = fgets($handle)) !== false) {
+                $trimmed = trim($line);
+                if ($trimmed === '') {
+                    continue;
                 }
+                $unquoted = preg_replace('/"[^"]*"/', '', $trimmed) ?? $trimmed;
+                $commaScore += substr_count($unquoted, ',');
+                $semicolonScore += substr_count($unquoted, ';');
+                $checked++;
             }
-
-            $workbook = $this->xml($zip, 'xl/workbook.xml');
-            $relations = $this->xml($zip, 'xl/_rels/workbook.xml.rels');
-            $workbookXpath = new DOMXPath($workbook);
-            $workbookXpath->registerNamespace('m', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
-            $workbookXpath->registerNamespace('r', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships');
-            $sheet = $workbookXpath->query('//m:sheets/m:sheet')->item(0);
-            if (! $sheet instanceof \DOMElement) {
-                throw new RuntimeException('Workbook XLSX tidak memiliki sheet.');
-            }
-            $relationId = $sheet->getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
-
-            $relationXpath = new DOMXPath($relations);
-            $relationXpath->registerNamespace('r', 'http://schemas.openxmlformats.org/package/2006/relationships');
-            $target = '';
-            foreach ($relationXpath->query('//r:Relationship') as $relation) {
-                if ($relation instanceof \DOMElement && $relation->getAttribute('Id') === $relationId) {
-                    $target = $relation->getAttribute('Target');
-                    break;
-                }
-            }
-            if ($target === '' || str_contains($target, '..')) {
-                throw new RuntimeException('Referensi sheet XLSX tidak valid.');
-            }
-            $sheetPath = str_starts_with($target, '/') ? ltrim($target, '/') : 'xl/'.ltrim($target, '/');
-            $sheetXml = $this->xml($zip, $sheetPath);
-            $strings = $this->sharedStrings($zip);
-            $xpath = new DOMXPath($sheetXml);
-            $xpath->registerNamespace('m', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
-
-            $matrix = [];
-            foreach ($xpath->query('//m:sheetData/m:row') as $row) {
-                $cells = [];
-                foreach ($xpath->query('./m:c', $row) as $cell) {
-                    if (! $cell instanceof \DOMElement) {
-                        continue;
-                    }
-                    if ($xpath->query('./m:f', $cell)->length > 0) {
-                        throw new RuntimeException('Rumus Excel tidak diimpor. Salin hasil sebagai nilai terlebih dahulu.');
-                    }
-                    preg_match('/^([A-Z]+)/', $cell->getAttribute('r'), $match);
-                    $columnIndex = isset($match[1]) ? $this->columnIndex($match[1]) : null;
-                    if ($columnIndex === null) {
-                        continue;
-                    }
-                    $type = $cell->getAttribute('t');
-                    if ($type === 'inlineStr') {
-                        $value = $xpath->query('./m:is//m:t', $cell);
-                        $text = '';
-                        foreach ($value as $part) {
-                            $text .= $part->textContent;
-                        }
-                    } else {
-                        $value = $xpath->query('./m:v', $cell)->item(0)?->textContent ?? '';
-                        $text = $type === 's' ? ($strings[(int) $value] ?? '') : $value;
-                    }
-                    $cells[$columnIndex] = trim((string) $text);
-                }
-                if ($cells !== []) {
-                    $max = max(array_keys($cells));
-                    $matrix[] = array_map(static fn ($i) => $cells[$i] ?? '', range(0, $max));
-                }
-                if (count($matrix) > self::MAX_ROWS + 1) {
-                    throw new RuntimeException('Maksimal 5.000 baris data per file.');
-                }
-            }
-
-            return $this->mapRows($matrix);
         } finally {
-            $zip->close();
+            fclose($handle);
         }
+
+        return $semicolonScore > $commaScore ? ';' : ',';
     }
 
-    private function xml(ZipArchive $zip, string $name): DOMDocument
-    {
-        $contents = $zip->getFromName($name);
-        if (! is_string($contents) || strlen($contents) > self::MAX_EXPANDED_BYTES) {
-            throw new RuntimeException('Struktur XLSX tidak lengkap atau terlalu besar.');
-        }
-
-        $document = new DOMDocument;
-        $document->resolveExternals = false;
-        $document->substituteEntities = false;
-        if (! $document->loadXML($contents, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_NOERROR | LIBXML_NOWARNING)) {
-            throw new RuntimeException('XML dalam XLSX tidak valid.');
-        }
-
-        return $document;
-    }
-
-    private function sharedStrings(ZipArchive $zip): array
-    {
-        $contents = $zip->getFromName('xl/sharedStrings.xml');
-        if (! is_string($contents)) {
-            return [];
-        }
-
-        $document = new DOMDocument;
-        $document->resolveExternals = false;
-        $document->substituteEntities = false;
-        if (! $document->loadXML($contents, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_NOERROR | LIBXML_NOWARNING)) {
-            throw new RuntimeException('Shared strings XLSX tidak valid.');
-        }
-        $xpath = new DOMXPath($document);
-        $xpath->registerNamespace('m', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
-        $strings = [];
-        foreach ($xpath->query('//m:si') as $item) {
-            $text = '';
-            foreach ($xpath->query('.//m:t', $item) as $part) {
-                $text .= $part->textContent;
-            }
-            $strings[] = $text;
-        }
-
-        return $strings;
-    }
-
+    /**
+     * Map raw CSV matrix rows into normalized CPCL fields.
+     *
+     * @param  array<int, array<int, string>>  $matrix
+     * @return array<int, array<string, mixed>>
+     */
     private function mapRows(array $matrix): array
     {
         if (count($matrix) < 2) {
-            throw new RuntimeException('File harus berisi satu baris header dan minimal satu baris data.');
+            throw new RuntimeException('File CSV harus berisi satu baris header dan minimal satu baris data.');
         }
+
         $headerIndex = null;
         $mapping = [];
         foreach (array_slice($matrix, 0, 10, true) as $index => $row) {
-            $candidate = [];
-            foreach ($row as $column => $label) {
-                $normalized = preg_replace('/[^a-z0-9]/', '', strtolower((string) $label));
-                foreach (self::ALIASES as $field => $aliases) {
-                    if (in_array($normalized, $aliases, true)) {
-                        $candidate[$field] = $column;
-                    }
-                }
-            }
-            if (isset($candidate['nama_di'], $candidate['provinsi'], $candidate['kabupaten'], $candidate['kel_tani'])) {
+            $candidate = $this->matchHeaderRow($row);
+            if ($candidate !== null) {
                 $headerIndex = $index;
                 $mapping = $candidate;
                 break;
             }
         }
+
         if ($headerIndex === null) {
-            throw new RuntimeException('Header CPCL tidak ditemukan. Gunakan template dan pastikan kolom Nama DI, Provinsi, Kab_Kota, dan Kel_Tani tersedia.');
+            throw new RuntimeException('Header CPCL tidak ditemukan. Gunakan template CSV SITERA dan pastikan kolom Nama DI, Provinsi, Kab_Kota, dan Kel_Tani tersedia.');
         }
 
         $rows = [];
         foreach (array_slice($matrix, $headerIndex + 1, null, true) as $rowIndex => $row) {
+            if ($this->matchHeaderRow($row) !== null) {
+                continue;
+            }
+
             $record = [];
             foreach (self::ALIASES as $field => $_) {
                 $record[$field] = isset($mapping[$field]) ? trim((string) ($row[$mapping[$field]] ?? '')) : '';
@@ -245,18 +143,40 @@ class CpclSpreadsheetReader
             }
             $record['_row'] = $rowIndex + 1;
             $rows[] = $record;
+            if (count($rows) > self::MAX_ROWS) {
+                throw new RuntimeException('Maksimal 5.000 baris data per file.');
+            }
+        }
+
+        if ($rows === []) {
+            throw new RuntimeException('File CSV tidak memiliki baris data di bawah header.');
         }
 
         return $rows;
     }
 
-    private function columnIndex(string $letters): int
+    /**
+     * Match a candidate header row against known CPCL column aliases.
+     *
+     * @param  array<int, string>  $row
+     * @return array<string, int>|null
+     */
+    private function matchHeaderRow(array $row): ?array
     {
-        $index = 0;
-        foreach (str_split($letters) as $letter) {
-            $index = $index * 26 + (ord($letter) - 64);
+        $candidate = [];
+        foreach ($row as $column => $label) {
+            $normalized = preg_replace('/[^a-z0-9]/', '', strtolower((string) $label));
+            foreach (self::ALIASES as $field => $aliases) {
+                if (in_array($normalized, $aliases, true)) {
+                    $candidate[$field] = $column;
+                }
+            }
         }
 
-        return $index - 1;
+        if (isset($candidate['nama_di'], $candidate['provinsi'], $candidate['kabupaten'], $candidate['kel_tani'])) {
+            return $candidate;
+        }
+
+        return null;
     }
 }

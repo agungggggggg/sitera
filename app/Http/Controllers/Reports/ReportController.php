@@ -14,16 +14,6 @@ use Illuminate\View\View;
 
 class ReportController extends Controller
 {
-    public function create(RegionCatalog $regions): View
-    {
-        return view('reports.create', [
-            'report' => null,
-            'provinces' => $regions->provinceNames(),
-            'regencies' => [],
-            'regionCatalog' => $regions->all(),
-        ]);
-    }
-
     public function edit(Request $request, int $report, RegionCatalog $regions): View
     {
         $draft = Report::query()

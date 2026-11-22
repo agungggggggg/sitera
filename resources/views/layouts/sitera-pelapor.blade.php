@@ -28,7 +28,7 @@
             <span class="internal-tag"><span></span> Sistem internal</span>
             <a class="icon-button" href="{{ route('notifications.index') }}" aria-label="Notifikasi" title="Notifikasi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>@php($unread = auth()->user()->unreadNotifications()->count())@if ($unread > 0)<i>{{ $unread > 9 ? '9+' : $unread }}</i>@endif</a>
             <div class="profile"><span class="avatar">{{ collect(explode(' ', trim(auth()->user()->name)))->filter()->map(fn ($part) => strtoupper(substr($part, 0, 1)))->take(2)->join('') ?: 'PD' }}</span><span class="profile-copy"><strong>{{ auth()->user()->name }}</strong><small>{{ auth()->user()->kabupaten ?: 'Wilayah belum ditetapkan' }}</small></span><span class="chevron">⌄</span></div>
-            <form class="logout-form" method="post" action="{{ route('logout') }}">@csrf<button class="exit-link" type="submit">Keluar</button></form>
+            @include('partials.logout-button')
         </div>
     </header>
     <nav class="main-nav" id="main-nav" aria-label="Navigasi Pelapor">

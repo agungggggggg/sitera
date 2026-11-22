@@ -7,10 +7,31 @@ use App\Models\CpclRecord;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class AdminCpclController extends Controller
 {
+    public function destroy(Request $request, CpclRecord $cpcl, AuditLogger $auditLogger): RedirectResponse
+    {
+        DB::transaction(function () use ($cpcl): void {
+            $locked = CpclRecord::query()->lockForUpdate()->findOrFail($cpcl->id);
+
+            if ($locked->reports()->exists()) {
+                throw ValidationException::withMessages([
+                    'cpcl' => 'Data CPCL tidak dapat dihapus karena sudah digunakan pada laporan.',
+                ]);
+            }
+
+            $locked->delete();
+        });
+
+        $auditLogger->log($request->user(), 'cpcl.deleted', 'success', 'cpcl', $cpcl->id);
+
+        return redirect()->route('admin.index', ['view' => 'cpcl'])
+            ->with('status', 'Data CPCL berhasil dihapus.');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([

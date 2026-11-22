@@ -41,15 +41,4 @@ class RegionCatalog
             return ['value' => $value, 'label' => $name];
         }, $official);
     }
-
-    public function contains(string $province, string $regency): bool
-    {
-        foreach ($this->regenciesFor($province) as $entry) {
-            if ($entry['value'] === $regency) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

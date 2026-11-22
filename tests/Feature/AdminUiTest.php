@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\AuditLog;
+use App\Models\CpclRecord;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,6 +38,10 @@ class AdminUiTest extends TestCase
             ->assertSee('Nonaktifkan')
             ->assertSee('acc-status', false)
             ->assertSee('delete-action', false)
+            ->assertSee('data-delete-account-form', false)
+            ->assertSee('account-delete-modal', false)
+            ->assertSee('account-delete-back', false)
+            ->assertSee('Yakin mau menghapus Akun')
             ->assertSee('Akun nonaktif ditolak');
     }
 
@@ -47,24 +52,23 @@ class AdminUiTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.index', ['view' => 'audit']))
             ->assertOk()
-            ->assertSee('Audit log')
-            ->assertSee('Pembaruan ·')
-            ->assertSee('Mode audit operasional.')
-            ->assertSee('dicatat oleh server')
-            ->assertSee('Hanya baca')
+            ->assertSee('Audit Log')
+            ->assertSee('Ruang Administrasi')
+            ->assertSee('Telusuri tindakan administratif tanpa mengubah catatan audit.')
+            ->assertSee('Riwayat tindakan administratif. Tampilan ini hanya-baca.')
             ->assertSee('Cari aktor, objek, tindakan, atau hasil')
             ->assertSee('Semua tindakan')
             ->assertSee('Semua hasil')
             ->assertSee('Reset')
-            ->assertSee('Telusuri tindakan administratif tanpa mengubah catatan audit.')
             ->assertSee('WAKTU')
             ->assertSee('AKTOR')
             ->assertSee('TINDAKAN')
             ->assertSee('OBJEK')
             ->assertSee('HASIL')
             ->assertSee('RINCIAN')
-            ->assertSee('date_from')
-            ->assertSee('date_to');
+            ->assertDontSee('Mode audit operasional.')
+            ->assertDontSee('Hanya baca')
+            ->assertDontSee('Pembaruan ·');
     }
 
     public function test_audit_log_table_restores_reference_columns_and_human_readable_rows(): void
@@ -110,9 +114,57 @@ class AdminUiTest extends TestCase
             ->assertOk()->assertSee('find@example.test')->assertDontSee('other@example.test');
 
         $this->actingAs($admin)->get(route('admin.index', ['view' => 'cpcl']))
-            ->assertOk()->assertSee('Referensi CPCL')->assertSee('Tambah CPCL')->assertDontSee('Impor data CPCL');
+            ->assertOk()
+            ->assertSee('Tambah CPCL secara manual')
+            ->assertSee('Referensi CPCL')
+            ->assertSee('Tambah CPCL')
+            ->assertSee('Simpan CPCL')
+            ->assertSee('Batal')
+            ->assertSee('Belum ada data CPCL operasional yang sesuai dengan filter.')
+            ->assertSee('id="cpcl-detail-modal"', false)
+            ->assertDontSee('Impor data CPCL');
 
         $this->actingAs($admin)->get(route('admin.index', ['view' => 'imports']))
-            ->assertOk()->assertSee('Impor data CPCL')->assertSee('Pratinjau hasil');
+            ->assertOk()
+            ->assertSee('Impor data CPCL')
+            ->assertSee('Template Excel (.xlsx)')
+            ->assertSee('Pilih file CSV')
+            ->assertSee('Validasi &amp; Pratinjau', false)
+            ->assertSee('Konfirmasi Penambahan')
+            ->assertDontSee('Template CSV')
+            ->assertDontSee('Template XLSX');
+    }
+
+    public function test_cpcl_table_renders_detail_and_delete_actions_for_each_record(): void
+    {
+        $role = Role::firstOrCreate(['code' => 'super_admin'], ['name' => 'Super Admin']);
+        $admin = User::factory()->create(['role_id' => $role->id]);
+        $cpcl = CpclRecord::create([
+            'no' => '1',
+            'nama_di' => 'DI Contoh Barat',
+            'kewenangan' => 'Kabupaten/Kota',
+            'keterangan' => 'Data sumber',
+            'provinsi' => 'Jawa Barat',
+            'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan',
+            'desa' => 'Mulyasari',
+            'kel_tani' => 'P3A Tirta Contoh',
+            'nama_ketua' => 'Ketua Uji',
+            'realisasi' => '1',
+            'luas_ha' => 25.00,
+            'x' => 107.1234,
+            'y' => -6.1234,
+        ]);
+
+        $this->actingAs($admin)->get(route('admin.index', ['view' => 'cpcl']))
+            ->assertOk()
+            ->assertSeeInOrder(['NO', 'NAMA DI', 'KEWENANGAN', 'KETERANGAN', 'PROVINSI', 'KAB/KOTA', 'KECAMATAN', 'DESA/KELURAHAN', 'KELOMPOK TANI', 'AKSI'])
+            ->assertSee('DI Contoh Barat')
+            ->assertSee('CPCL #'.$cpcl->id)
+            ->assertSee('P3A Tirta Contoh')
+            ->assertSee('data-cpcl-detail=', false)
+            ->assertSee('action="'.route('admin.cpcl.destroy', $cpcl).'"', false)
+            ->assertSee('Detail')
+            ->assertSee('Hapus');
     }
 }

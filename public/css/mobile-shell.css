@@ -39,8 +39,8 @@
   .sidebar-toggle,.icon-button,.btn,.button,.action-link,.queue-row-action{min-height:44px}
   .icon-button,.icon-btn{min-width:44px}
   .app-header .logout-form{display:block}
-  .app-header .header-right .exit-link{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0 7px;border:1px solid #d6e2e7;border-radius:9px;font-size:0}
-  .app-header .header-right .exit-link::before{content:"↪";font-size:16px;line-height:1}
+  .app-header .header-right .exit-link{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border:1px solid #d6e2e7;border-radius:9px}
+  .top-actions .exit-link{width:44px;height:44px;min-width:44px;min-height:44px}
   .mini-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px}
   input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),select,textarea{min-height:44px}
   .pagination a,.pagination span{min-height:40px;align-items:center}
