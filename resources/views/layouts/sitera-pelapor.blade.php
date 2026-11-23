@@ -26,21 +26,23 @@
         <div class="header-right">
             <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
             <span class="internal-tag"><span></span> Sistem internal</span>
-            <a class="icon-button" href="{{ route('notifications.index') }}" aria-label="Notifikasi" title="Notifikasi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>@php($unread = auth()->user()->unreadNotifications()->count())@if ($unread > 0)<i>{{ $unread > 9 ? '9+' : $unread }}</i>@endif</a>
-            <div class="profile"><span class="avatar">{{ collect(explode(' ', trim(auth()->user()->name)))->filter()->map(fn ($part) => strtoupper(substr($part, 0, 1)))->take(2)->join('') ?: 'PD' }}</span><span class="profile-copy"><strong>{{ auth()->user()->name }}</strong><small>{{ auth()->user()->kabupaten ?: 'Wilayah belum ditetapkan' }}</small></span><span class="chevron">⌄</span></div>
+            @include('partials.notification-button')
+            <div class="profile"><span class="avatar">{{ collect(explode(' ', trim(auth()->user()->name)))->filter()->map(fn ($part) => strtoupper(substr($part, 0, 1)))->take(2)->join('') ?: 'PD' }}</span><span class="profile-copy"><strong>{{ auth()->user()->name }}</strong><small>{{ auth()->user()->kabupaten ?: 'Wilayah belum ditetapkan' }}</small></span></div>
             @include('partials.logout-button')
         </div>
     </header>
     <nav class="main-nav" id="main-nav" aria-label="Navigasi Pelapor">
-        <a class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="nav-icon">⌂</span>Ringkasan</a>
-        <a class="nav-item {{ request()->routeIs('reports.index') || request()->routeIs('reports.show') ? 'active' : '' }}" href="{{ route('reports.index') }}"><span class="nav-icon">▤</span>Laporan Saya</a>
-        <a class="nav-item {{ request()->routeIs('reports.create') || request()->routeIs('reports.package.*') ? 'active' : '' }}" href="{{ route('reports.create') }}"><span class="nav-icon">⌕</span>Pilih CPCL</a>
-        <a class="nav-item {{ request()->routeIs('reports.all') ? 'active' : '' }}" href="{{ route('reports.all') }}"><span class="nav-icon">▦</span>Semua Laporan</a>
+        <a class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'home'])</span>Ringkasan</a>
+        <a class="nav-item {{ request()->routeIs('reports.index') || request()->routeIs('reports.show') ? 'active' : '' }}" href="{{ route('reports.index') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'file-text'])</span>Laporan Saya</a>
+        <a class="nav-item {{ request()->routeIs('reports.create') || request()->routeIs('reports.package.*') ? 'active' : '' }}" href="{{ route('reports.create') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'search'])</span>Pilih CPCL</a>
+        <a class="nav-item {{ request()->routeIs('reports.all') ? 'active' : '' }}" href="{{ route('reports.all') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'grid'])</span>Semua Laporan</a>
     </nav>
     <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
     <main class="workspace">
         @if (session('status'))<div class="notice" role="status"><span class="notice-icon">✓</span><span>{{ session('status') }}</span></div>@endif
-        @include('layouts.filter-errors')
+        @sectionMissing('suppress_layout_errors')
+            @include('layouts.filter-errors')
+        @endif
         @yield('content')
         <footer class="app-footer"><span>© {{ now()->year }} SITERA · Kementerian Pertanian</span><span>Ruang Pelapor · data sesuai hak akses akun</span></footer>
     </main>

@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\CpclRecord;
+use App\Models\Report;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class AdminDashboardUiTest extends TestCase
@@ -51,5 +53,55 @@ class AdminDashboardUiTest extends TestCase
             ->assertOk()
             ->assertDontSee('Rekap Status CPCL')
             ->assertSee('Buat Laporan');
+    }
+
+    public function test_super_admin_donut_uses_status_specific_color_when_earlier_buckets_are_zero(): void
+    {
+        $adminRole = Role::firstOrCreate(['code' => 'super_admin'], ['name' => 'Super Admin']);
+        $reporterRole = Role::firstOrCreate(['code' => 'pelapor_daerah'], ['name' => 'Pelapor Daerah']);
+        $verifierRole = Role::firstOrCreate(['code' => 'verifikator_pusat'], ['name' => 'Verifikator Pusat']);
+
+        $admin = User::factory()->create(['role_id' => $adminRole->id]);
+        $reporter = User::factory()->create(['role_id' => $reporterRole->id, 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Subang']);
+        $verifier = User::factory()->create(['role_id' => $verifierRole->id]);
+
+        $cpcl = CpclRecord::create([
+            'nama_di' => 'DI Pamanukan',
+            'provinsi' => 'Jawa Barat',
+            'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan',
+            'desa' => 'Mulyasari',
+            'kel_tani' => 'P3A Tirta',
+        ]);
+
+        $report = Report::create([
+            'user_id' => $reporter->id,
+            'cpcl_id' => $cpcl->id,
+            'nomor_tiket' => 'LP-20261123-0001',
+            'status' => 'TERKIRIM',
+            'versi' => 1,
+            'tanggal_kejadian' => Carbon::yesterday(),
+            'provinsi' => 'Jawa Barat',
+            'kabupaten' => 'Subang',
+            'kecamatan' => 'Pamanukan',
+            'desa' => 'Mulyasari',
+            'nama_saluran' => 'DI Pamanukan',
+            'jenis_kerusakan' => 'Paket CPCL',
+            'deskripsi' => 'Laporan sesuai.',
+            'sumber_isian' => 'MANUAL',
+            'dikirim_pada' => now(),
+        ]);
+
+        $report->verification()->create([
+            'verifier_id' => $verifier->id,
+            'hasil' => 'SESUAI',
+            'catatan' => 'Lengkap.',
+            'diperiksa_pada' => now(),
+        ]);
+
+        $this->actingAs($admin)->get('/dashboard')
+            ->assertOk()
+            ->assertSee('stroke="#39845a"', false)
+            ->assertDontSee('stroke="#879ba5"', false);
     }
 }

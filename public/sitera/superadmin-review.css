@@ -1004,6 +1004,11 @@
     border-top: 1px solid #edf2f4
 }
 
+.audit-pagination .sitera-pagination {
+    padding: 0;
+    border-top: 0
+}
+
 @media(max-width:900px) {
     .audit-filter-main {
         grid-template-columns: minmax(180px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) auto

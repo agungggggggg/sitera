@@ -36,7 +36,7 @@
         .logout-form{display:inline-flex;margin:0}.logout-form .exit-link{cursor:pointer}
         .nav-item{text-decoration:none}
         .table td{vertical-align:middle}
-        @media(max-width:700px){.account-filter{align-items:stretch}.account-filter .search-control,.account-filter .filter-control{width:100%;min-width:0}.account-actions{justify-content:flex-start}.row-actions{gap:8px}.row-actions button{min-height:44px;padding:8px 11px;font-size:10px}}
+        @media(max-width:700px){.account-filter{align-items:stretch}.account-filter .search-control,.account-filter .filter-control{width:100%;min-width:0}.account-actions{justify-content:flex-start}.row-actions{gap:8px}.row-actions button{width:44px;height:44px;min-height:44px;padding:0;font-size:10px}.row-actions svg{width:16px;height:16px}}
         @media(max-width:560px){.audit-panel-heading{padding:15px 14px 12px}.audit-filter-form{padding:0 14px 12px}.audit-filter-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.audit-search{grid-column:1/-1;height:44px}.audit-search input{height:44px;min-height:44px}.audit-select,.audit-reset{height:44px;min-height:44px}.audit-table th,.audit-table td{padding:11px 12px}}
     </style>
 </head>
@@ -45,16 +45,16 @@
 <header class="app-header">
     <a class="brand" href="{{ route('dashboard') }}" aria-label="SITERA beranda"><span class="brand-logo"><img src="{{ asset('sitera/sitera-logo.webp') }}" alt="Logo Irigasi Pertanian"></span><span class="brand-copy"><strong>SITERA</strong><small>Sistem Informasi Rekapitulasi & Pemantauan Kegiatan Irigasi Pertanian</small></span></a>
     <div class="header-right"><button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="internal-tag"><span></span> Sistem internal</span>
-        <a class="icon-button" href="{{ route('notifications.index') }}" aria-label="Notifikasi" title="Notifikasi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        @include('partials.notification-button')
         <div class="profile"><span class="avatar">SA</span><span class="profile-copy"><strong>{{ auth()->user()->name }}</strong><small>Administrasi Sistem</small></span></div>@include('partials.logout-button')
     </div>
 </header>
 <nav class="main-nav" id="main-nav" aria-label="Navigasi Super Admin">
-    <a class="nav-item {{ $activeView === 'dashboard' ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="nav-icon">⌂</span>Ringkasan</a>
-    <a class="nav-item {{ $activeView === 'accounts' ? 'active' : '' }}" href="{{ route('admin.index', ['view' => 'accounts']) }}"><span class="nav-icon">♙</span>Manajemen Akun</a>
-    <a class="nav-item {{ $activeView === 'cpcl' ? 'active' : '' }}" href="{{ route('admin.index', ['view' => 'cpcl']) }}"><span class="nav-icon">▤</span>Data CPCL</a>
-    <a class="nav-item {{ $activeView === 'imports' ? 'active' : '' }}" href="{{ route('admin.index', ['view' => 'imports']) }}"><span class="nav-icon">⇧</span>Impor CPCL</a>
-    <a class="nav-item {{ $activeView === 'audit' ? 'active' : '' }}" href="{{ route('admin.index', ['view' => 'audit']) }}"><span class="nav-icon">◷</span>Audit Log</a>
+    <a class="nav-item {{ $activeView === 'dashboard' ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'home'])</span>Ringkasan</a>
+    <a class="nav-item {{ $activeView === 'accounts' ? 'active' : '' }}" href="{{ route('admin.index', ['view' => 'accounts']) }}"><span class="nav-icon">@include('partials.icon', ['name' => 'users'])</span>Manajemen Akun</a>
+    <a class="nav-item {{ $activeView === 'cpcl' ? 'active' : '' }}" href="{{ route('admin.index', ['view' => 'cpcl']) }}"><span class="nav-icon">@include('partials.icon', ['name' => 'file-text'])</span>Data CPCL</a>
+    <a class="nav-item {{ $activeView === 'imports' ? 'active' : '' }}" href="{{ route('admin.index', ['view' => 'imports']) }}"><span class="nav-icon">@include('partials.icon', ['name' => 'upload'])</span>Impor CPCL</a>
+    <a class="nav-item {{ $activeView === 'audit' ? 'active' : '' }}" href="{{ route('admin.index', ['view' => 'audit']) }}"><span class="nav-icon">@include('partials.icon', ['name' => 'clock'])</span>Audit Log</a>
 </nav>
 <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
 <main class="workspace">
@@ -101,7 +101,7 @@
             </details>
             <form method="get" action="{{ route('admin.index') }}" class="toolbar account-filter">
                 <input type="hidden" name="view" value="accounts">
-                <label class="search-control"><span>⌕</span><input name="q" type="search" value="{{ $filters['q'] }}" placeholder="Cari email, PIC, provinsi, atau kabupaten"></label>
+                <label class="search-control"><span>@include('partials.icon', ['name' => 'search'])</span><input name="q" type="search" value="{{ $filters['q'] }}" placeholder="Cari email, PIC, provinsi, atau kabupaten"></label>
                 <select class="filter-control" name="status"><option value="">Semua status</option><option value="pending" @selected($filters['status'] === 'pending')>Menunggu aktivasi</option><option value="pic_pending" @selected($filters['status'] === 'pic_pending')>Menunggu verifikasi PIC</option><option value="active" @selected($filters['status'] === 'active')>Aktif</option><option value="inactive" @selected($filters['status'] === 'inactive')>Nonaktif</option></select>
                 <select class="filter-control" name="role"><option value="">Semua peran</option><option value="pelapor_daerah" @selected($filters['role'] === 'pelapor_daerah')>Pelapor Daerah</option><option value="verifikator_pusat" @selected($filters['role'] === 'verifikator_pusat')>Verifikator Pusat</option><option value="pimpinan_kementan" @selected($filters['role'] === 'pimpinan_kementan')>Pimpinan</option><option value="super_admin" @selected($filters['role'] === 'super_admin')>Super Admin</option></select>
                 <button class="btn btn-outline btn-sm" type="submit">Filter</button><a class="btn btn-outline btn-sm" href="{{ route('admin.index', ['view' => 'accounts']) }}">Reset</a>
@@ -406,7 +406,7 @@
         </section>
     </section>
     @else
-    <section id="view-audit" class="view active">@include('admin.partials.audit-log')</section>
+    <section id="view-audit" class="view active">@include('admin.partials.audit-log', ['suppressAuditErrors' => true])</section>
     @endif
 </main>
 <script>

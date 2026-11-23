@@ -6,7 +6,7 @@
 <div class="page-heading"><div><div class="breadcrumb"><span>Ruang Pelapor</span><span>/</span><strong>Laporan Saya</strong></div><h1>Laporan Saya</h1><p>Kelola draf dan pantau laporan yang sudah dikirim untuk akun Anda.</p></div><div class="heading-actions"><a class="btn btn-primary" href="{{ route('reports.create') }}">＋ Buat Laporan</a></div></div>
 <section class="panel table-panel">
     <form data-cascade-filters class="toolbar" method="get" action="{{ route('reports.index') }}">
-        <label class="search-control"><span>⌕</span><input id="report-search" name="q" type="search" value="{{ $filters['q'] }}" placeholder="Cari ID, kelompok tani, atau Nama DI"></label>
+        <label class="search-control"><span>@include('partials.icon', ['name' => 'search'])</span><input id="report-search" name="q" type="search" value="{{ $filters['q'] }}" placeholder="Cari ID, kelompok tani, atau Nama DI"></label>
         <select class="filter-control" name="provinsi" aria-label="Filter provinsi"><option value="">Semua provinsi</option>@foreach ($provinces as $province)<option value="{{ $province }}" @selected($filters['provinsi'] === $province)>{{ $province }}</option>@endforeach</select>
         <select class="filter-control" name="kelompok_tani" aria-label="Filter kelompok tani"><option value="">Semua kelompok tani</option>@foreach ($groups as $group)<option value="{{ $group }}" @selected($filters['kelompok_tani'] === $group)>{{ $group }}</option>@endforeach</select>
         <select class="filter-control" name="nama_di" aria-label="Filter nama DI"><option value="">Semua Nama DI</option>@foreach ($irrigations as $di)<option value="{{ $di }}" @selected($filters['nama_di'] === $di)>{{ $di }}</option>@endforeach</select>

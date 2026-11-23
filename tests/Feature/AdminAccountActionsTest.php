@@ -80,6 +80,55 @@ class AdminAccountActionsTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $target->id, 'deleted_at' => null]);
     }
 
+    public function test_super_admin_can_recreate_account_with_same_email_after_deleting_it(): void
+    {
+        config(['sitera.default_password' => 'Local-test-default-22!']);
+        $admin = $this->user('super_admin');
+        $deletedViaController = $this->user('pelapor_daerah', [
+            'email' => 'dika@pelapor.irigasi',
+            'username' => 'dika-lama',
+            'provinsi' => 'Aceh',
+            'kabupaten' => 'Aceh Besar',
+        ]);
+
+        $this->actingAs($admin)->delete(route('admin.users.destroy', $deletedViaController))
+            ->assertRedirect('/admin-only?view=accounts');
+        $this->assertSoftDeleted('users', ['id' => $deletedViaController->id]);
+
+        $this->actingAs($admin)->post('/admin/users', [
+            'email' => 'dika@pelapor.irigasi',
+            'role' => 'pelapor_daerah',
+            'provinsi' => 'Aceh',
+            'kabupaten' => 'Aceh Besar',
+        ])->assertRedirect('/admin-only?view=accounts')->assertSessionHasNoErrors();
+
+        $recreated = User::query()->where('email', 'dika@pelapor.irigasi')->firstOrFail();
+        $this->assertNotSame($deletedViaController->id, $recreated->id);
+
+        // Active account email must still reject duplicate creation
+        $this->actingAs($admin)->post('/admin/users', [
+            'email' => 'dika@pelapor.irigasi',
+            'role' => 'verifikator_pusat',
+        ])->assertSessionHasErrors('email');
+
+        // Pre-existing soft-deleted row whose email was not yet released must also allow reuse
+        $legacyTrashed = $this->user('verifikator_pusat', [
+            'email' => 'legacy.deleted@sitera.test',
+            'username' => 'legacy-deleted',
+        ]);
+        $legacyTrashed->delete();
+
+        $this->actingAs($admin)->post('/admin/users', [
+            'email' => 'legacy.deleted@sitera.test',
+            'role' => 'verifikator_pusat',
+        ])->assertRedirect('/admin-only?view=accounts')->assertSessionHasNoErrors();
+        $this->assertSoftDeleted('users', ['id' => $legacyTrashed->id]);
+        $this->assertDatabaseHas('users', [
+            'email' => 'legacy.deleted@sitera.test',
+            'deleted_at' => null,
+        ]);
+    }
+
     private function user(string $roleCode, array $attributes = []): User
     {
         $role = Role::firstOrCreate(['code' => $roleCode], ['name' => $roleCode]);

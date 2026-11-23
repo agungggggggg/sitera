@@ -44,6 +44,8 @@
   .mini-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px}
   input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),select,textarea{min-height:44px}
   .pagination a,.pagination span{min-height:40px;align-items:center}
+  .sitera-pagination{padding:12px;justify-content:center}
+  .sitera-page-link{min-width:40px;height:40px;font-size:12px}
 }
 
 @media(max-width:480px){

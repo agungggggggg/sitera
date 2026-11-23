@@ -22,19 +22,19 @@
         </div>
         <div class="nav-label">Ruang kerja</div>
         <nav class="nav">
-            <a class="{{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="ico">⌂</span><span>Ringkasan</span></a>
+            <a class="{{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="ico">@include('partials.icon', ['name' => 'home'])</span><span>Ringkasan</span></a>
             @if ($user->role?->code === 'pelapor_daerah')
-                <a class="{{ request()->routeIs('reports.index') || request()->routeIs('reports.show') ? 'active' : '' }}" href="{{ route('reports.index') }}"><span class="ico">▤</span><span>Laporan saya</span></a>
+                <a class="{{ request()->routeIs('reports.index') || request()->routeIs('reports.show') ? 'active' : '' }}" href="{{ route('reports.index') }}"><span class="ico">@include('partials.icon', ['name' => 'file-text'])</span><span>Laporan saya</span></a>
                 <a class="{{ request()->routeIs('reports.create') ? 'active' : '' }}" href="{{ route('reports.create') }}"><span class="ico">＋</span><span>Pilih CPCL</span></a>
             @endif
             @if ($user->role?->code === 'verifikator_pusat')
-                <a class="{{ request()->routeIs('verification.index') ? 'active' : '' }}" href="{{ route('verification.index') }}"><span class="ico">◉</span><span>Antrean pemeriksaan</span></a>
+                <a class="{{ request()->routeIs('verification.index') ? 'active' : '' }}" href="{{ route('verification.index') }}"><span class="ico">@include('partials.icon', ['name' => 'file-text'])</span><span>Antrean pemeriksaan</span></a>
             @endif
             @if ($user->role?->code === 'pimpinan_kementan')
-                <a class="{{ request()->routeIs('monitoring.index') ? 'active' : '' }}" href="{{ route('monitoring.index') }}"><span class="ico">◫</span><span>Monitoring nasional</span></a>
+                <a class="{{ request()->routeIs('monitoring.index') ? 'active' : '' }}" href="{{ route('monitoring.index') }}"><span class="ico">@include('partials.icon', ['name' => 'grid'])</span><span>Monitoring nasional</span></a>
             @endif
             @if ($user->role?->code === 'super_admin')
-                <a class="{{ request()->is('admin-only') ? 'active' : '' }}" href="{{ url('/admin-only') }}"><span class="ico">⚙</span><span>Manajemen Akun</span></a>
+                <a class="{{ request()->is('admin-only') ? 'active' : '' }}" href="{{ url('/admin-only') }}"><span class="ico">@include('partials.icon', ['name' => 'users'])</span><span>Manajemen Akun</span></a>
             @else
                 <a href="{{ route('exports.csv', ['format' => 'xlsx']) }}"><span class="ico">⇩</span><span>Ekspor rekap</span></a>
             @endif
@@ -46,10 +46,10 @@
     <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
     <main class="main">
         <header class="topbar">
-            <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+            <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
             <div class="crumb">SITERA <span>/</span> <b>@yield('breadcrumb', 'Ringkasan')</b></div>
             <div class="top-actions">
-                <a style="position:relative" class="icon-btn notification-link" href="{{ route('notifications.index') }}" title="Notifikasi" aria-label="Notifikasi">♧@php($unreadNotifications = $user->unreadNotifications()->count())@if ($unreadNotifications)<span class="unread-count">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>@endif</a>
+                <a style="position:relative" class="icon-btn notification-link" href="{{ route('notifications.index') }}" title="Notifikasi" aria-label="Notifikasi"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>@php($unreadNotifications = $user->unreadNotifications()->count())@if ($unreadNotifications)<span class="unread-count">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>@endif</a>
                 <div class="user-chip"><span class="avatar mini">{{ $initials ?: 'U' }}</span><span>{{ $user->name }}</span></div>
                 @include('partials.logout-button')
             </div>

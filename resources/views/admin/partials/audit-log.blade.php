@@ -46,7 +46,7 @@
         </div>
     </form>
 
-    @if ($errors->any())
+    @if ($errors->any() && empty($suppressAuditErrors))
         <div class="admin-error" role="alert"><strong>Periksa filter:</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
     @endif
 

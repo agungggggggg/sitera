@@ -1,6 +1,7 @@
 @extends('layouts.sitera-pelapor')
 
 @section('title', ($report ? 'Edit Draf' : 'Dokumen Pelaporan') . ' — SITERA')
+@section('suppress_layout_errors', '1')
 
 @section('content')
 <div class="page-heading">

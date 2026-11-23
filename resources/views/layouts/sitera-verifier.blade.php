@@ -20,18 +20,24 @@
     <div class="header-right">
         <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         <span class="internal-tag"><span></span> Sistem internal</span>
-        <a class="icon-button" href="{{ route('notifications.index') }}" aria-label="Notifikasi" title="Notifikasi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        @include('partials.notification-button')
         <div class="profile"><span class="avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span><span class="profile-copy"><strong>{{ auth()->user()->name }}</strong><small>Verifikator Pusat</small></span></div>
         @include('partials.logout-button')
     </div>
 </header>
 <nav class="main-nav" id="main-nav" aria-label="Navigasi Verifikator">
-    <a class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="nav-icon">⌂</span>Ringkasan</a>
-    <a class="nav-item {{ request()->routeIs('verification.index') || request()->routeIs('verification.show') ? 'active' : '' }}" href="{{ route('verification.index') }}"><span class="nav-icon">▤</span>Antrean Pemeriksaan <span class="nav-count">{{ \App\Models\Report::query()->where('status', 'TERKIRIM')->whereDoesntHave('verification')->count() }}</span></a>
-    <a class="nav-item {{ request()->routeIs('verification.history') ? 'active' : '' }}" href="{{ route('verification.history') }}"><span class="nav-icon">◷</span>Riwayat Pemeriksaan</a>
+    <a class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'home'])</span>Ringkasan</a>
+    <a class="nav-item {{ request()->routeIs('verification.index') || request()->routeIs('verification.show') ? 'active' : '' }}" href="{{ route('verification.index') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'file-text'])</span>Antrean Pemeriksaan <span class="nav-count">{{ \App\Models\Report::query()->where('status', 'TERKIRIM')->whereDoesntHave('verification')->count() }}</span></a>
+    <a class="nav-item {{ request()->routeIs('verification.history') ? 'active' : '' }}" href="{{ route('verification.history') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'clock'])</span>Riwayat Pemeriksaan</a>
 </nav>
 <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
-<main class="workspace">@include('layouts.filter-errors')@yield('content')<footer class="app-footer"><span>© {{ now()->year }} SITERA · Kementerian Pertanian</span><span>Ruang Verifikator · hak akses pemeriksaan</span></footer></main>
+<main class="workspace">
+    @sectionMissing('suppress_layout_errors')
+        @include('layouts.filter-errors')
+    @endif
+    @yield('content')
+    <footer class="app-footer"><span>© {{ now()->year }} SITERA · Kementerian Pertanian</span><span>Ruang Verifikator · hak akses pemeriksaan</span></footer>
+</main>
 <script src="{{ asset('sitera/sidebar.js') }}"></script>
 @stack('scripts')
 <script src="{{ asset('sitera/filter-controls.js') }}"></script>

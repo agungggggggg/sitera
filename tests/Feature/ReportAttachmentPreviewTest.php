@@ -66,6 +66,31 @@ class ReportAttachmentPreviewTest extends TestCase
         $this->actingAs($owner)->get('/lampiran/'.$attachment->id.'/preview')->assertNotFound();
     }
 
+    public function test_verifier_can_preview_submitted_pdf_inside_same_origin_iframe(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('reports/bast.pdf', '%PDF-1.4 test');
+        $owner = $this->userWithRole('pelapor_daerah');
+        $verifier = $this->userWithRole('verifikator_pusat');
+        $report = $this->reportFor($owner, 'TERKIRIM');
+        $attachment = $report->attachments()->create([
+            'kategori' => 'BAST',
+            'versi' => 1,
+            'path' => 'reports/bast.pdf',
+            'original_name' => 'BAST-contoh.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 13,
+        ]);
+
+        $response = $this->actingAs($verifier)->get('/lampiran/'.$attachment->id.'/preview');
+        $response->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', 'inline; filename=BAST-contoh.pdf');
+        $csp = (string) $response->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString("frame-ancestors 'self'", $csp);
+        $this->assertStringNotContainsString('sandbox', $csp);
+    }
+
     private function reportFor(User $owner, string $status): Report
     {
         return Report::create([

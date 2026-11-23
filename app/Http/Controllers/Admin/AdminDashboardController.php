@@ -68,7 +68,14 @@ class AdminDashboardController extends Controller
             $statusCounts[$status]++;
         }
 
-        $chartColors = ['#879ba5', '#086288', '#d49a3a', '#b9504c', '#39845a'];
+        $statusColorMap = [
+            'Belum ada laporan' => '#879ba5',
+            'Draf' => '#086288',
+            'Menunggu pemeriksaan' => '#d49a3a',
+            'Tidak sesuai' => '#b9504c',
+            'Sesuai' => '#39845a',
+        ];
+        $chartColors = array_values($statusColorMap);
         $chartTotal = array_sum($statusCounts);
         $circumference = 2 * pi() * 82;
         $dashOffset = 0.0;
@@ -78,7 +85,7 @@ class AdminDashboardController extends Controller
                 continue;
             }
             $dashLength = $statusCount / $chartTotal * $circumference;
-            $chartSegments[] = ['color' => $chartColors[count($chartSegments)], 'dash' => $dashLength, 'offset' => -$dashOffset];
+            $chartSegments[] = ['color' => $statusColorMap[$statusLabel], 'dash' => $dashLength, 'offset' => -$dashOffset];
             $dashOffset += $dashLength;
         }
 

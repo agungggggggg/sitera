@@ -9,6 +9,7 @@ use App\Services\AuditLogger;
 use App\Services\RegionCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -48,11 +49,16 @@ class AdminUserController extends Controller
             throw ValidationException::withMessages(['user' => 'Akun Super Admin yang sedang digunakan tidak dapat dihapus.']);
         }
 
-        $user->delete();
+        $displayLabel = $user->username ?: $user->email;
+
+        DB::transaction(function () use ($user): void {
+            $this->releaseTrashedIdentity($user);
+            $user->delete();
+        });
 
         app(AuditLogger::class)->log($request->user(), 'user.deleted', 'success', 'user', $user->id);
 
-        return redirect('/admin-only?view=accounts')->with('status', 'Akun '.$user->username.' dihapus dari daftar aktif. Riwayat laporan tetap dipertahankan.');
+        return redirect('/admin-only?view=accounts')->with('status', 'Akun '.$displayLabel.' dihapus dari daftar aktif. Riwayat laporan tetap dipertahankan.');
     }
 
     public function setActive(Request $request, User $user): RedirectResponse
@@ -80,7 +86,7 @@ class AdminUserController extends Controller
         $province = (string) $request->input('provinsi', '');
         $regencies = array_column($regions->regenciesFor($province), 'value');
         $validated = $request->validate([
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->withoutTrashed()],
             'role' => ['required', Rule::in(['pelapor_daerah', 'verifikator_pusat', 'pimpinan_kementan'])],
             'provinsi' => ['nullable', 'required_if:role,pelapor_daerah', 'string', Rule::in($regions->provinceNames())],
             'kabupaten' => ['nullable', 'required_if:role,pelapor_daerah', 'string', Rule::in($regencies)],
@@ -98,21 +104,48 @@ class AdminUserController extends Controller
         ];
         $role = Role::firstOrCreate(['code' => $validated['role']], ['name' => $roleNames[$validated['role']]]);
 
-        $createdUser = User::create([
-            'username' => null,
-            'name' => self::PENDING_NAME,
-            'email' => $validated['email'],
-            'contact' => null,
-            'role_id' => $role->id,
-            'provinsi' => $validated['provinsi'] ?? null,
-            'kabupaten' => $validated['kabupaten'] ?? null,
-            'password' => Hash::make(config('sitera.default_password')),
-            'is_active' => false,
-            'must_change_password' => true,
-        ]);
+        $createdUser = DB::transaction(function () use ($validated, $role): User {
+            User::onlyTrashed()
+                ->where('email', $validated['email'])
+                ->get()
+                ->each(fn (User $trashed): mixed => $this->releaseTrashedIdentity($trashed));
+
+            return User::create([
+                'username' => null,
+                'name' => self::PENDING_NAME,
+                'email' => $validated['email'],
+                'contact' => null,
+                'role_id' => $role->id,
+                'provinsi' => $validated['provinsi'] ?? null,
+                'kabupaten' => $validated['kabupaten'] ?? null,
+                'password' => Hash::make(config('sitera.default_password')),
+                'is_active' => false,
+                'must_change_password' => true,
+            ]);
+        });
 
         app(AuditLogger::class)->log($request->user(), 'user.created', 'success', 'user', $createdUser->id);
 
         return redirect('/admin-only?view=accounts')->with('status', 'Akun '.$validated['email'].' dibuat. Status Menunggu aktivasi; pengguna melengkapi nama PIC dan membuat password baru saat login pertama.');
+    }
+
+    /**
+     * Free unique email and username columns on a soft-deleted account so the address can be re-issued.
+     */
+    private function releaseTrashedIdentity(User $user): void
+    {
+        $suffix = '.deleted.'.$user->id.'.'.now()->timestamp;
+        $maxPrefixLength = max(1, 255 - mb_strlen($suffix));
+        $updates = ['is_active' => false];
+
+        if ($user->email !== null && preg_match('/\.deleted\.\d+\.\d+$/', $user->email) !== 1) {
+            $updates['email'] = mb_substr($user->email, 0, $maxPrefixLength, 'UTF-8').$suffix;
+        }
+
+        if ($user->username !== null && preg_match('/\.deleted\.\d+\.\d+$/', $user->username) !== 1) {
+            $updates['username'] = mb_substr($user->username, 0, $maxPrefixLength, 'UTF-8').$suffix;
+        }
+
+        $user->forceFill($updates)->save();
     }
 }

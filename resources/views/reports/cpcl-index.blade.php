@@ -4,13 +4,13 @@
 
 @section('content')
 <div class="page-heading"><div><div class="breadcrumb"><span>Ruang Pelapor</span><span>/</span><strong>Pilih CPCL</strong></div><h1>Pilih CPCL</h1><p>Pilih kelompok tani sebagai dasar paket laporan BAST, LPJ, dan dokumentasi.</p></div><div class="heading-actions"><span class="period-chip"><span></span> {{ auth()->user()->kabupaten ?: 'Wilayah belum ditetapkan' }}</span></div></div>
-<div class="cpcl-intro panel"><div class="cpcl-intro-icon">⌕</div><div><h2>Pilih data CPCL</h2><p>Pilih kelompok tani yang akan menjadi dasar paket laporan. Data yang tampil dibatasi ke kabupaten akun Anda.</p></div></div>
+<div class="cpcl-intro panel"><div class="cpcl-intro-icon">@include('partials.icon', ['name' => 'search'])</div><div><h2>Pilih data CPCL</h2><p>Pilih kelompok tani yang akan menjadi dasar paket laporan. Data yang tampil dibatasi ke kabupaten akun Anda.</p></div></div>
 @if (!$regionAssigned)
     <div class="notice"><span class="notice-icon">!</span><span><strong>Wilayah akun belum ditetapkan.</strong> Hubungi Super Admin agar provinsi dan kabupaten/kota di akun Anda diatur.</span></div>
 @else
 <section class="panel table-panel">
     <form class="toolbar" method="get" action="{{ route('reports.create') }}">
-        <label class="search-control"><span>⌕</span><input id="cpcl-search" name="q" type="search" value="{{ $filters['q'] }}" placeholder="Cari nama kelompok tani atau Daerah Irigasi"></label>
+        <label class="search-control"><span>@include('partials.icon', ['name' => 'search'])</span><input id="cpcl-search" name="q" type="search" value="{{ $filters['q'] }}" placeholder="Cari nama kelompok tani atau Daerah Irigasi"></label>
         <select class="filter-control" id="cpcl-province" aria-label="Filter provinsi" disabled><option>{{ auth()->user()->provinsi }}</option></select>
         <select class="filter-control" id="cpcl-regency" aria-label="Filter kabupaten" disabled><option>{{ auth()->user()->kabupaten }}</option></select>
         <select class="filter-control" id="cpcl-district" name="kecamatan" aria-label="Filter kecamatan"><option value="">Semua kecamatan</option>@foreach ($districts as $district)<option value="{{ $district }}" @selected($filters['kecamatan'] === $district)>{{ $district }}</option>@endforeach</select>

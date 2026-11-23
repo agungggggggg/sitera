@@ -32,17 +32,17 @@
     <div class="header-right">
         <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="main-nav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         <span class="internal-tag"><span></span> Sistem internal</span>
-        <a class="icon-button" href="{{ route('notifications.index') }}" aria-label="Notifikasi" title="Notifikasi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>@php($unread = auth()->user()->unreadNotifications()->count())@if ($unread > 0)<i class="notification-count">{{ $unread }}</i>@endif</a>
+        @include('partials.notification-button')
         <div class="profile"><span class="avatar">SA</span><span class="profile-copy"><strong>{{ auth()->user()->name }}</strong><small>Administrasi Sistem</small></span></div>
         @include('partials.logout-button')
     </div>
 </header>
 <nav class="main-nav" id="main-nav" aria-label="Navigasi Super Admin">
-    <a class="nav-item active" href="{{ route('dashboard') }}"><span class="nav-icon">⌂</span>Ringkasan</a>
-    <a class="nav-item" href="{{ route('admin.index', ['view' => 'accounts']) }}"><span class="nav-icon">♙</span>Manajemen Akun</a>
-    <a class="nav-item" href="{{ route('admin.index', ['view' => 'cpcl']) }}"><span class="nav-icon">▤</span>Data CPCL</a>
-    <a class="nav-item" href="{{ route('admin.index', ['view' => 'imports']) }}"><span class="nav-icon">⇧</span>Impor CPCL</a>
-    <a class="nav-item" href="{{ route('admin.index', ['view' => 'audit']) }}"><span class="nav-icon">◷</span>Audit Log</a>
+    <a class="nav-item active" href="{{ route('dashboard') }}"><span class="nav-icon">@include('partials.icon', ['name' => 'home'])</span>Ringkasan</a>
+    <a class="nav-item" href="{{ route('admin.index', ['view' => 'accounts']) }}"><span class="nav-icon">@include('partials.icon', ['name' => 'users'])</span>Manajemen Akun</a>
+    <a class="nav-item" href="{{ route('admin.index', ['view' => 'cpcl']) }}"><span class="nav-icon">@include('partials.icon', ['name' => 'file-text'])</span>Data CPCL</a>
+    <a class="nav-item" href="{{ route('admin.index', ['view' => 'imports']) }}"><span class="nav-icon">@include('partials.icon', ['name' => 'upload'])</span>Impor CPCL</a>
+    <a class="nav-item" href="{{ route('admin.index', ['view' => 'audit']) }}"><span class="nav-icon">@include('partials.icon', ['name' => 'clock'])</span>Audit Log</a>
 </nav>
 <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
 <main class="workspace">
@@ -54,10 +54,10 @@
 
     <section id="view-dashboard" class="view active">
         <div class="metrics-grid admin-metrics" id="admin-metrics">
-            <article class="metric"><div class="metric-top"><span>Total akun</span><span class="metric-icon">♙</span></div><div class="metric-value">{{ $totalUsers }}</div><div class="metric-meta">Semua peran terdaftar</div></article>
-            <article class="metric"><div class="metric-top"><span>Akun Pelapor aktif</span><span class="metric-icon">✓</span></div><div class="metric-value">{{ $reporterCount }}</div><div class="metric-meta">Pelapor Daerah</div></article>
-            <article class="metric"><div class="metric-top"><span>Akun Pusat</span><span class="metric-icon">◷</span></div><div class="metric-value">{{ $verifierCount + $executiveCount }}</div><div class="metric-meta">Verifikator & Pimpinan</div></article>
-            <article class="metric"><div class="metric-top"><span>Total referensi CPCL</span><span class="metric-icon">▤</span></div><div class="metric-value">{{ $cpclCount }}</div><div class="metric-meta">Baris CPCL tersimpan</div></article>
+            <article class="metric"><div class="metric-top"><span>Total akun</span><span class="metric-icon">@include('partials.icon', ['name' => 'users'])</span></div><div class="metric-value">{{ $totalUsers }}</div><div class="metric-meta">Semua peran terdaftar</div></article>
+            <article class="metric"><div class="metric-top"><span>Akun Pelapor aktif</span><span class="metric-icon">@include('partials.icon', ['name' => 'check'])</span></div><div class="metric-value">{{ $reporterCount }}</div><div class="metric-meta">Pelapor Daerah</div></article>
+            <article class="metric"><div class="metric-top"><span>Akun Pusat</span><span class="metric-icon">@include('partials.icon', ['name' => 'clock'])</span></div><div class="metric-value">{{ $verifierCount + $executiveCount }}</div><div class="metric-meta">Verifikator & Pimpinan</div></article>
+            <article class="metric"><div class="metric-top"><span>Total referensi CPCL</span><span class="metric-icon">@include('partials.icon', ['name' => 'file-text'])</span></div><div class="metric-value">{{ $cpclCount }}</div><div class="metric-meta">Baris CPCL tersimpan</div></article>
         </div>
 
         <section class="panel cpcl-donut-panel role-cpcl-donut dashboard-panel">

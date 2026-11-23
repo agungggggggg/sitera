@@ -28,12 +28,15 @@ class ReportAttachmentPreviewController extends Controller
             HeaderUtils::DISPOSITION_INLINE,
             basename($attachment->original_name),
         );
+        $csp = $attachment->mime_type === 'application/pdf'
+            ? "frame-ancestors 'self';"
+            : "sandbox; default-src 'none'; frame-ancestors 'self';";
 
         return response()->file($path, [
             'Content-Type' => $attachment->mime_type,
             'Content-Disposition' => $disposition,
             'X-Content-Type-Options' => 'nosniff',
-            'Content-Security-Policy' => "sandbox; default-src 'none';",
+            'Content-Security-Policy' => $csp,
         ]);
     }
 }

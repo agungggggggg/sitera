@@ -43,11 +43,29 @@ class VerifierUiFlowTest extends TestCase
             ->assertDontSee($other->nomor_tiket)
             ->assertSee('Periksa');
 
+        $report->attachments()->create([
+            'kategori' => 'BAST',
+            'versi' => 1,
+            'path' => 'reports/bast-test.pdf',
+            'original_name' => 'bast-test.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 2048,
+        ]);
+
         $this->actingAs($verifier)->get('/verifikasi/'.$report->id)
             ->assertOk()
+            ->assertSee('IDENTITAS LAPORAN')
+            ->assertSee('Dokumen yang diperiksa')
+            ->assertSee('Riwayat versi dan pemeriksaan')
             ->assertSee('Hasil pemeriksaan gabungan')
             ->assertSee('Tidak sesuai')
-            ->assertSee('name="catatan"', false);
+            ->assertSee('Sesuai')
+            ->assertSee('name="catatan"', false)
+            ->assertSee('review-back-btn', false)
+            ->assertSee('review-doc-modal', false)
+            ->assertSee('doc-modal-frame', false)
+            ->assertSee('doc-modal-note', false)
+            ->assertSee('data-doc-preview', false);
     }
 
     public function test_verifier_history_is_limited_to_reviews_made_by_current_user(): void

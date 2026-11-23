@@ -18,6 +18,7 @@
         .password-help-brand strong{display:block;font:800 16px Manrope,Arial,sans-serif;letter-spacing:.04em}
         .password-help-brand small{display:block;margin-top:3px;color:#728892;font-size:9px}
         .password-help-icon{display:grid;width:43px;height:43px;place-items:center;margin-bottom:17px;border:1px solid #cfe2ea;border-radius:12px;background:#f2f8fb;color:#086288;font-size:20px}
+        .password-help-icon svg{width:20px;height:20px;display:block}
         .password-help-kicker{color:#086288;font-size:9px;font-weight:800;letter-spacing:.12em}
         .password-help-card h1{margin:8px 0 9px;color:#173d4d;font:800 clamp(24px,6vw,30px)/1.2 Manrope,Arial,sans-serif;letter-spacing:-.035em}
         .password-help-intro{margin:0;color:#71858e;font-size:13px;line-height:1.7}
@@ -37,7 +38,7 @@
             <span class="brand-logo"><img src="{{ asset('sitera/sitera-logo.webp') }}" alt="Logo SITERA"></span>
             <span><strong>SITERA</strong><small>Sistem Informasi Irigasi Tersier</small></span>
         </a>
-        <div class="password-help-icon" aria-hidden="true">⌑</div>
+        <div class="password-help-icon" aria-hidden="true">@include('partials.icon', ['name' => 'key'])</div>
         <span class="password-help-kicker">BANTUAN AKSES AKUN</span>
         <h1 id="password-help-title">Lupa password?</h1>
         <p class="password-help-intro">Untuk menjaga keamanan akun, reset password dilakukan oleh Super Admin SITERA.</p>
